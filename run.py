@@ -1,7 +1,9 @@
-# Write your code to expect a terminal of 80 characters wide and 24 rows high__
+# 79 79 79 79 79 79 79 -- MAX width of your terminal-- 79 79 79 79 79 79 79 79
+# External libraries to access google sheets
 import gspread
 from google.oauth2.service_account import Credentials
 
+# Contstant variables for credentials and APIs
 SCOPE = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive.file",
@@ -12,7 +14,7 @@ SCOPED_CREDS = CREDS.with_scopes(SCOPE)
 GSPREAD_CLIENT = gspread.authorize(SCOPED_CREDS)
 SHEET = GSPREAD_CLIENT.open('cookie_batches')
 
-"""The three available recipes are listed below as constant variables"""
+# The three available recipes are listed below as constant variables
 RASPBERRY_WHITECHOCOLATE_COOKIE = {
     "wet ingredients": {
         "Butter": 0.16,
@@ -50,15 +52,18 @@ PEANUT_BUTTER_COOKIE = {
         "Baking Soda": 0.002,
         "Reesee’s Chips": 0.19}}
 
+# Set up APIs
 batches = SHEET.worksheet('batches')
-
 batch_data = batches.get_all_values()
+
+# Script for the Cookie Factory Terminal starts from here
 
 
 def start_menu():
-    """Function prints out the main menu where user can choose from
-    displayed activities"""
-
+    """
+    Function prints out the main menu presenting the user the
+    available activities
+    """
     print("Welcome to the Cookie Factory’s procedure terminal!")
     print("Available actions:")
     print("\t a.	Bake Cookies")
@@ -77,9 +82,8 @@ def start_menu():
 
 def validate_data(data):
     """
-    Try, checks the entered data and 
-    Raises ValueError if strings cannot be converted into int,
-    or if there aren't exactly 6 values.
+    Checks if the data entered is a or b, the only data
+    accepted.
     """
     try:
         if data != "a" and data != "b":
