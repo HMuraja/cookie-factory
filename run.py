@@ -50,9 +50,46 @@ PEANUT_BUTTER_COOKIE = {
         "Baking Soda": 0.002,
         "Reesee’s Chips": 0.19}}
 
-print(RASPBERRY_WHITECHOCOLATE_COOKIE)
-
 batches = SHEET.worksheet('batches')
 
 batch_data = batches.get_all_values()
 
+
+def start_menu():
+    """Function prints out the main menu where user can choose from
+    displayed activities"""
+
+    print("Welcome to the Cookie Factory’s procedure terminal!")
+    print("Available actions:")
+    print("\t a.	Bake Cookies")
+    print("\t b.	View Batches")
+
+    while True:
+        choice = input("\nSelect an action by entering a or b:\n")
+        if validate_data(choice):
+            if choice == "a":
+                print("\nUploading available Recipes...\n")
+            else:
+                print("\nUploading batch data...\n")
+            break
+    return choice
+
+
+def validate_data(data):
+    """
+    Try, checks the entered data and 
+    Raises ValueError if strings cannot be converted into int,
+    or if there aren't exactly 6 values.
+    """
+    try:
+        if data != "a" and data != "b":
+            raise ValueError(
+                "Please enter either a or b"
+            )
+    except ValueError as e:
+        print(f"\nInvalid data! {e}, please try again.")
+        return False  
+    return True
+
+
+selection = start_menu()
