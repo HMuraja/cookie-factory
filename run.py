@@ -63,6 +63,7 @@ def start_menu():
     Function prints out the main menu presenting the user the
     available activities
     """
+    print("---------COOKIE FACTORY TERMINAL---------")
     print("Welcome to the Cookie Factory’s procedure terminal!")
     print("Available actions:")
     print("\t a.	Bake Cookies")
@@ -117,7 +118,8 @@ def select_recipe():
     User input is validated by running user input trhough validate_data 
     function.
     """
-    print("Available recipes:")
+    print("---------Choose a Protocol---------")
+    print("\nAvailable recipes:")
     print("\t1.	Classic Cookies")
     print("\t2.	Raspberry and White Chocolate Cookies")
     print("\t3.	Peanut Butter Cookies")
@@ -141,37 +143,75 @@ def manufacture_cookies(cookie_protocol):
     recipe = COOKIE_PROTOCOL[cookie_protocol[1]]
     #Total wight of the dough when one cookie is 90g
     weight = cookie_protocol[0] * 90 
-    next_line = "\nPress enter to move onto next step"
+    next_line = "\n\tPress enter to move onto next step"
     wet_ingredients = recipe["wet ingredients"]
     dry_ingredients = recipe["dry ingredients"]
 
     #Instructions start from here
-    print("(Step 1) Gather the following Ingredients:")
+    print(f"---------Running {cookie_protocol[1]} Protocol---------")
+    input("Press enter once ready to start")
+    print("\n(Step 1) Gather the following Ingredients:")
     for ingredient in wet_ingredients.keys():
         print(f"\n\t {ingredient}")
     for ingredient in dry_ingredients.keys():
         print(f"\n\t {ingredient}")
     input(next_line)
 
-    print(
-        "\n(Step 2) Check that mixer and the work station is clean & free of particles.")
+    print("\n(Step 2) Check that mixer and the work station is")
+    print("\tclean & free of particles.")
     input(next_line)
 
-    print("(Step 3) Measure and place the following ingredients into the mixer:")
+    print("\n(Step 3) Measure and place the following ingredients into the mixer:")
     for ingredient, amount in recipe["wet ingredients"].items():
-        print(f"\n\t {amount}g of {ingredient}")
+        print(f"\n\t{ingredient} \t{amount * weight}g")
     input(next_line)
+
+    mixing_step(5, 4)
+
+    print("\n(Step 7) While the mixer is running")
+    print("\tmeasure and place following ingredients to the measuring bowl:")
+    for ingredient, amount in recipe["dry ingredients"].items():
+        print(f"\n\t{ingredient}\t\t{amount * weight}g")
+
+    print("\n(Step 8)Mix the dry ingredients using a whisker.")
+    input(next_line) 
+
+    print("\n(Step 9)Once mixer timer has finished, open the")
+    print("\tguard and place the dry ingredients on top of the wet ingredients.")
+    input(next_line) 
+
+    mixing_step(2, 10)
+
+    
+
+
+def mixing_step(time, first_step_no):
+    """Function for printing the  mixing steps"""
+    print(f"\n(Step{first_step_no}) Set the mixer speed to number two")
+    print(f"\tclose the guard and set the timer for {time} minutes.")
+    print("\tPress start.")
+    input("\n\tPress enter to move onto next step")
+
+    print(f"\n(Step{first_step_no + 1}) Once timer has finished and mixer")
+    print("\thas stopped. Open the guard and use a spatula")
+    print("\tto scrape any dough on the sides down into bottom")
+    input("\n\tPress enter to move onto next step")
+
+    print(f"\n(Step{first_step_no + 2}) Close the guard,")
+    print("\tconfirm speed is 2 and set the timer for 5 minutes.")
+    print("\tPress start.")
+    input("\n\tPress enter to move onto next step")
 
 
 def main():
     """
     Runs the terminal functions
     """
-    terminal_action = start_menu()
-    if terminal_action == "a":
-        protocol_info = select_recipe()
-        #protocol_info = (11, "Raspberry and White Chocolate Cookies")
-        manufacture_cookies(protocol_info)
+    #terminal_action = start_menu()
+    #if terminal_action == "a":
+        #protocol_info = select_recipe()
+    protocol_info = (11, "Raspberry and White Chocolate Cookies")
+    manufacture_cookies(protocol_info)
 
 
 main()
