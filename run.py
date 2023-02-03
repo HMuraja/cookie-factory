@@ -135,6 +135,34 @@ def select_recipe():
             return (amount, recipe_name)       
 
 
+def manufacture_cookies(cookie_protocol):
+    """Step instructions to manufacture cookies"""
+    #The recipe selected
+    recipe = COOKIE_PROTOCOL[cookie_protocol[1]]
+    #Total wight of the dough when one cookie is 90g
+    weight = cookie_protocol[0] * 90 
+    next_line = "\nPress enter to move onto next step"
+    wet_ingredients = recipe["wet ingredients"]
+    dry_ingredients = recipe["dry ingredients"]
+
+    #Instructions start from here
+    print("(Step 1) Gather the following Ingredients:")
+    for ingredient in wet_ingredients.keys():
+        print(f"\n\t {ingredient}")
+    for ingredient in dry_ingredients.keys():
+        print(f"\n\t {ingredient}")
+    input(next_line)
+
+    print(
+        "\n(Step 2) Check that mixer and the work station is clean & free of particles.")
+    input(next_line)
+
+    print("(Step 3) Measure and place the following ingredients into the mixer:")
+    for ingredient, amount in recipe["wet ingredients"].items():
+        print(f"\n\t {amount}g of {ingredient}")
+    input(next_line)
+
+
 def main():
     """
     Runs the terminal functions
@@ -142,6 +170,8 @@ def main():
     terminal_action = start_menu()
     if terminal_action == "a":
         protocol_info = select_recipe()
+        #protocol_info = (11, "Raspberry and White Chocolate Cookies")
+        manufacture_cookies(protocol_info)
 
 
 main()
