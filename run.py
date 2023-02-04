@@ -97,12 +97,12 @@ def validate_data(data, answer_string, *expected_input):
         return False  
 
 
-def validate_cookie_range(data, answer_string):
+def validate_range(data, answer_string, min, max):
     """
     Checks if the data entered is a value 10-100
     """
     try:
-        if data >= 10 and data <=100:
+        if data >= min and data <=max:
             return True
         raise ValueError(
             f"Please enter {answer_string}"
@@ -132,28 +132,22 @@ def select_recipe():
     while True:
         amount = int(input(
             "\nHow many cookies you plan to prepare min 10 max 100): "))
-        if validate_cookie_range(amount, "number from 10-100"):
+        if validate_range(amount, "number from 10-100", 10, 100):
             print(f"\nUploading procedure for {amount} {recipe_name}...\n")
             return (amount, recipe_name)       
 
 
-def manufacture_cookies(cookie_protocol):
+def start_manufacturing(cookie_protocol):
     """Step instructions to manufacture cookies"""
-    #The recipe selected
     recipe = COOKIE_PROTOCOL[cookie_protocol[1]]
-    #Total wight of the dough when one cookie is 90g
-    weight = cookie_protocol[0] * 90 
     next_line = "\n\tPress enter to move onto next step"
-    wet_ingredients = recipe["wet ingredients"]
-    dry_ingredients = recipe["dry ingredients"]
 
-    #Instructions start from here
     print(f"---------Running {cookie_protocol[1]} Protocol---------")
     input("Press enter once ready to start")
     print("\n(Step 1) Gather the following Ingredients:")
-    for ingredient in wet_ingredients.keys():
+    for ingredient in recipe["wet ingredients"].keys():
         print(f"\n\t {ingredient}")
-    for ingredient in dry_ingredients.keys():
+    for ingredient in recipe["wet ingredients"].keys():
         print(f"\n\t {ingredient}")
     input(next_line)
 
@@ -161,28 +155,100 @@ def manufacture_cookies(cookie_protocol):
     print("\tclean & free of particles.")
     input(next_line)
 
+
+def mix_ingredients(cookie_protocol):
+    """Instructions for handing the dry ingredients"""
+    recipe = COOKIE_PROTOCOL[cookie_protocol[1]]
+    weight = cookie_protocol[0] * 90
+    next_line = "\n\tPress enter to move onto next step"
+    
     print("\n(Step 3) Measure and place the following ingredients into the mixer:")
     for ingredient, amount in recipe["wet ingredients"].items():
         print(f"\n\t{ingredient} \t{amount * weight}g")
     input(next_line)
 
     mixing_step(5, 4)
+    recipe = COOKIE_PROTOCOL[cookie_protocol[1]]
+    weight = cookie_protocol[0] * 90
 
     print("\n(Step 7) While the mixer is running")
     print("\tmeasure and place following ingredients to the measuring bowl:")
     for ingredient, amount in recipe["dry ingredients"].items():
         print(f"\n\t{ingredient}\t\t{amount * weight}g")
 
-    print("\n(Step 8)Mix the dry ingredients using a whisker.")
-    input(next_line) 
+    print("\n(Step 8) Mix the dry ingredients using a whisker.")
+    input(next_line)
 
-    print("\n(Step 9)Once mixer timer has finished, open the")
+    print("\n(Step 9) Once mixer timer has finished, open the")
     print("\tguard and place the dry ingredients on top of the wet ingredients.")
-    input(next_line) 
+    input(next_line)
 
     mixing_step(2, 10)
 
+    print("\n(Step 14) Open the guard and remove the mixing bowl")
+    print("\tremove from the machine onto a trolley.")
+    input(next_line)
+
+
+def bake_and_store(cookie_protocol):
+    """Instructions to bake, store and label the cookies"""
+    next_line = "\n\tPress enter to move onto next step"
+
+    print("\n(steps 15) Place {w/90/13 round up} pans on the work")
+    print("\t surface and place a baking sheet on top of each one.")
+    input(next_line)
     
+    print("\n(Step 16) Using a cookie scoop place one scoop on the")
+    print("\t scale, and add or remove dough until it weights around")
+    print("\t 85-95g. Place the measured dough on the baking sheet.")
+    print("\tRepeat the process until dough is finished.")
+    print("\tNote that if the last cookie does not achieve 85 g, discard this dough.")
+    input(next_line)
+
+    while True:
+        cookies_made = input("\tEnter the amount of cookies prepared:\t")
+        if validate_range(cookies_made, f"number from 0-{cookie_protocol[0]}", 0,cookie_protocol[0]):
+            print("Entered data valid!Please proceed!")
+            break
+    print("\n(Step 17) Place the cookie pans in a trolley and transport them")
+    print("\tcloser to the ovens.")
+    print("\tOne by one place the pans in the oven")
+    print("\tSet the timer for 12 minutes.")
+    input(next_line)
+
+    print("\n(Step18) Using oven-mittens remove the pans from the oven ")
+    print("\tPlace them in the trolley. Visually inspect the cookies.")
+    print("\tand discard any cookies that are burnt or disfigured.")
+    while True:
+        cookies_discarded = input("Enter amount of cookies discarded:\t")
+        total_cookies = cookie_protocol[0] - cookies_made
+        if validate_range(cookies_discarded, f"number from 0-{total_cookies}", 0, total_cookies):
+            print("Entered data valid!Please proceed!")
+            break
+    input(next_line)
+
+    print("\n(Step20) Transport the trolley in the storage area")
+    print("\tlabel the trolley with batch number{batch_no}.")
+    print("\tSet the timer for 1 hour.")
+    input(next_line)
+
+    print("\n(Step 21) Once time is up, place cookies in storage boxes")
+    print("\tand label each one with the following information:")
+    print("\tBatch Number:)")
+    print(f"\tType: {cookie_protocol[1]}")
+    print("\tManufacturing date:)")
+    input(next_line)
+
+    print("\tProcess finished!")
+    return [cookies_made, cookies_discarded]
+
+def save_batch_data(batch_no):
+    while True:
+        entry = input(
+            "\t Type yes/no if you wish to save the batch information: ")
+        if validate_data(entry, "yes or no"):
+            print(f"Save here the batch data{batch_no}")
+            break
 
 
 def mixing_step(time, first_step_no):
@@ -211,7 +277,9 @@ def main():
     #if terminal_action == "a":
         #protocol_info = select_recipe()
     protocol_info = (11, "Raspberry and White Chocolate Cookies")
-    manufacture_cookies(protocol_info)
+    start_manufacturing(protocol_info)
+    mix_ingredients(protocol_info)
+    bake_and_store(protocol_info)
 
 
 main()
