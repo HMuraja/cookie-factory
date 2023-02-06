@@ -97,16 +97,12 @@ def validate_data(data, answer_string, *expected_input):
         return False  
 
 
-def validate_range(data, answer_string, min, max):
-    """
-    Checks if the data entered is a value 10-100
-    """
+def validate_range(data, min, max, answer_string):
+    """Validates a data that should be within certain range""" 
     try:
-        if data >= min and data <=max:
+        if int(data) and int(data) in range(min, (max+1)):
             return True
-        raise ValueError(
-            f"Please enter {answer_string}"
-            )
+        raise ValueError(f"Please enter {answer_string}")
     except ValueError as e:
         print(f"\nInvalid data! {e}, please try again.")
         return False
@@ -144,15 +140,15 @@ def start_manufacturing(cookie_protocol):
 
     print(f"---------Running {cookie_protocol[1]} Protocol---------")
     input("Press enter once ready to start")
-    print("\n(Step 1) Gather the following Ingredients:")
+    print("\n\t(Step 1) Gather the following Ingredients:")
     for ingredient in recipe["wet ingredients"].keys():
         print(f"\n\t {ingredient}")
     for ingredient in recipe["wet ingredients"].keys():
         print(f"\n\t {ingredient}")
     input(next_line)
 
-    print("\n(Step 2) Check that mixer and the work station is")
-    print("\tclean & free of particles.")
+    print("\n\t(Step 2) Check that mixer and the work station is clean & free of")
+    print("\tparticles.")
     input(next_line)
 
 
@@ -162,31 +158,31 @@ def mix_ingredients(cookie_protocol):
     weight = cookie_protocol[0] * 90
     next_line = "\n\tPress enter to move onto next step"
     
-    print("\n(Step 3) Measure and place the following ingredients into the mixer:")
+    print("\n\t(Step 3) Measure & place the below ingredients into the mixer:")
     for ingredient, amount in recipe["wet ingredients"].items():
-        print(f"\n\t{ingredient} \t{amount * weight}g")
+        print(f"\n\t{ingredient} - {amount * weight}g")
     input(next_line)
 
     mixing_step(5, 4)
     recipe = COOKIE_PROTOCOL[cookie_protocol[1]]
     weight = cookie_protocol[0] * 90
 
-    print("\n(Step 7) While the mixer is running")
+    print("\n\t(Step 7) While the mixer is running")
     print("\tmeasure and place following ingredients to the measuring bowl:")
     for ingredient, amount in recipe["dry ingredients"].items():
         print(f"\n\t{ingredient}\t\t{amount * weight}g")
 
-    print("\n(Step 8) Mix the dry ingredients using a whisker.")
+    print("\n\t(Step 8) Mix the dry ingredients using a whisker.")
     input(next_line)
 
-    print("\n(Step 9) Once mixer timer has finished, open the")
+    print("\n\t(Step 9) Once mixer timer has finished, open the")
     print("\tguard and place the dry ingredients on top of the wet ingredients.")
     input(next_line)
 
     mixing_step(2, 10)
 
-    print("\n(Step 14) Open the guard and remove the mixing bowl")
-    print("\tremove from the machine onto a trolley.")
+    print("\n\t(Step 14) Open the guard and remove the mixing bowl")
+    print("\t   remove from the machine onto a trolley.")
     input(next_line)
 
 
@@ -194,77 +190,85 @@ def bake_and_store(cookie_protocol):
     """Instructions to bake, store and label the cookies"""
     next_line = "\n\tPress enter to move onto next step"
 
-    print("\n(steps 15) Place {w/90/13 round up} pans on the work")
-    print("\t surface and place a baking sheet on top of each one.")
+    print(f"\n\t(steps 15) Place {w/90/13} pans on the work")
+    print("\tsurface and place a baking sheet on top of each one.")
     input(next_line)
     
-    print("\n(Step 16) Using a cookie scoop place one scoop on the")
-    print("\t scale, and add or remove dough until it weights around")
-    print("\t 85-95g. Place the measured dough on the baking sheet.")
-    print("\tRepeat the process until dough is finished.")
-    print("\tNote that if the last cookie does not achieve 85 g, discard this dough.")
+    print("\n\t(Step 16) Place one scoop of cookie dough on the scale.")
+    print("\t Add or remove dough until it weights around 85-95g.")
+    print("\t Place the measured dough on the baking sheet.")
+    print("\t Repeat the process until dough is finished.")
+    print("\t IF the last cookie is less than 85 g, discard this dough.")
     input(next_line)
 
     while True:
-        cookies_made = input("\tEnter the amount of cookies prepared:\t")
-        if validate_range(cookies_made, f"number from 0-{cookie_protocol[0]}", 0,cookie_protocol[0]):
-            print("Entered data valid!Please proceed!")
+        cookies_made = input("\n\tEnter the amount of cookies prepared:\t")
+        if validate_range(cookies_made, 0, cookie_protocol[0], f"number from 0-{cookie_protocol[0]}", ):
+            print("\tEntered data valid!Please proceed!")
             break
-    print("\n(Step 17) Place the cookie pans in a trolley and transport them")
-    print("\tcloser to the ovens.")
-    print("\tOne by one place the pans in the oven")
+    print("\n\t(Step 17) Place the cookie pans in a trolley and transport them")
+    print("\tnext to the ovens.")
+    print("\tOne by one place the pans in the oven.")
     print("\tSet the timer for 12 minutes.")
     input(next_line)
 
-    print("\n(Step18) Using oven-mittens remove the pans from the oven ")
-    print("\tPlace them in the trolley. Visually inspect the cookies.")
-    print("\tand discard any cookies that are burnt or disfigured.")
+    print("\n\t(Step18) Using oven-mittens remove the pans from the oven ")
+    print("\t and place them in the trolley.")
+    print("\tInspect the cookies and discard any burnt or disfigured ones.")
     while True:
-        cookies_discarded = input("Enter amount of cookies discarded:\t")
-        total_cookies = cookie_protocol[0] - cookies_made
-        if validate_range(cookies_discarded, f"number from 0-{total_cookies}", 0, total_cookies):
-            print("Entered data valid!Please proceed!")
+        cookies_discarded = input("\tEnter the amount of cookies discarded:\t")
+        if validate_range(cookies_discarded, 0, int(cookies_made), f"number from 0-{int(cookies_made)}"):
+            print("\tEntered data valid!Please proceed!")
+            if cookies_discarded == cookies_made:
+                choice = input("All cookies dicarded? Type yes or no:")
+                if validate_data(choice, "yes or no"):
+                    if choice == "yes":
+                        print("Process finished!")
+                        main()
+                    else:
+                        continue
             break
     input(next_line)
 
-    print("\n(Step20) Transport the trolley in the storage area")
+    print("\n\t(Step20) Transport the trolley in the storage area")
     print("\tlabel the trolley with batch number{batch_no}.")
     print("\tSet the timer for 1 hour.")
     input(next_line)
 
-    print("\n(Step 21) Once time is up, place cookies in storage boxes")
+    print("\n\t(Step 21) Once time is up, place cookies in storage boxes")
     print("\tand label each one with the following information:")
-    print("\tBatch Number:)")
-    print(f"\tType: {cookie_protocol[1]}")
-    print("\tManufacturing date:)")
+    print("\tBatch Number:")
+    print(f"\tType: \t{cookie_protocol[1]}")
+    print("\tManufacturing date:")
     input(next_line)
 
-    print("\tProcess finished!")
+    print("\n\tProcess finished!")
     return [cookies_made, cookies_discarded]
+
 
 def save_batch_data(batch_no):
     while True:
         entry = input(
             "\t Type yes/no if you wish to save the batch information: ")
-        if validate_data(entry, "yes or no"):
+        if validate_data(entry, "yes or no", "yes", "no"):
             print(f"Save here the batch data{batch_no}")
             break
 
 
 def mixing_step(time, first_step_no):
     """Function for printing the  mixing steps"""
-    print(f"\n(Step{first_step_no}) Set the mixer speed to number two")
+    print(f"\n\t(Step{first_step_no}) Set the mixer speed to number two and")
     print(f"\tclose the guard and set the timer for {time} minutes.")
     print("\tPress start.")
     input("\n\tPress enter to move onto next step")
 
-    print(f"\n(Step{first_step_no + 1}) Once timer has finished and mixer")
-    print("\thas stopped. Open the guard and use a spatula")
-    print("\tto scrape any dough on the sides down into bottom")
+    print(f"\n\t(Step{first_step_no + 1}) Once timer has finished and mixer")
+    print("\thas stopped. Open the guard and use the spatula")
+    print("\tto scrape the mixture on the sides down into the bottom.")
     input("\n\tPress enter to move onto next step")
 
-    print(f"\n(Step{first_step_no + 2}) Close the guard,")
-    print("\tconfirm speed is 2 and set the timer for 5 minutes.")
+    print(f"\n\t(Step{first_step_no + 1}) Close the guard, confirm speed")
+    print(f"\t is fixed to 2 and set the timer for {time} minutes.")
     print("\tPress start.")
     input("\n\tPress enter to move onto next step")
 
@@ -280,6 +284,7 @@ def main():
     start_manufacturing(protocol_info)
     mix_ingredients(protocol_info)
     bake_and_store(protocol_info)
+    #save_batch_data(batch_no):
 
 
 main()
