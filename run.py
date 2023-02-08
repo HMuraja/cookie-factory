@@ -3,6 +3,7 @@
 import math
 import gspread
 from google.oauth2.service_account import Credentials
+from datetime import date
 
 # Contstant variables for credentials and APIs
 SCOPE = [
@@ -17,7 +18,9 @@ SHEET = GSPREAD_CLIENT.open('cookie_batches')
 
 # The three available recipes are listed below as constant variables
 COOKIE_PROTOCOL = {
-    "Classic Cookies": {
+    "1": {
+        "abbreviation": "cl",
+        "name": "Classic Cookies",
         "wet ingredients": {
             "Butter": 0.16,
             "Vanilla Extract": 0.005,
@@ -28,7 +31,9 @@ COOKIE_PROTOCOL = {
             "Baking Powder": 0.003,
             "Baking Soda": 0.002,
             "White Chocolate": 0.19}},
-    "Raspberry and White Chocolate Cookies": {
+    "2": {
+        "abbreviation": "rw",
+        "name": "Raspberry and White Chocolate Cookies",
         "wet ingredients": {
             "Butter": 0.16,
             "Vanilla Extract": 0.005,
@@ -39,7 +44,9 @@ COOKIE_PROTOCOL = {
             "Baking Powder": 0.003,
             "Baking Soda": 0.002,
             "White Chocolate": 0.19}},
-    "Peanut Butter Cookies": {
+    "3": {
+        "abbreviation": "rw",
+        "name": "Peanut Butter Cookies",
         "wet ingredients": {
             "Butter": 0.18,
             "Vanilla Extract": 0.005,
@@ -83,8 +90,8 @@ def start_menu():
 
 def validate_data(data, answer_string, *expected_input):
     """
-    Checks if the data entered is a or b, the only data
-    accepted.
+    Checks if the data entered is any of the expected input, the only data
+    accepted. 
     """
     try:
         for expectation in expected_input:
@@ -124,14 +131,15 @@ def select_recipe():
         choice = int(input(
             "\nPlease select a recipe by entering the corresponding number: "))
         if validate_data(choice, "1, 2 or 3", 1, 2, 3):
-            recipe_name = list(COOKIE_PROTOCOL.keys())[choice-1]
+            cookies_dict= COOKIE_PROTOCOL[str(choice)]
+            recipe_name = cookies_dict["name"]
             break
     while True:
         amount = int(input(
             "\nHow many cookies you plan to prepare min 10 max 100): "))
         if validate_range(amount, 10, 100):
             print(f"\nUploading procedure for {amount} {recipe_name}...\n")
-            return (amount, recipe_name)       
+            return (amount, str(choice))       
 
 
 def start_manufacturing(cookie_protocol):
@@ -142,7 +150,6 @@ def start_manufacturing(cookie_protocol):
     print("R U N N I N G   P R O T O C O L:")
     print(f"\t{cookie_protocol[1]}")
     input("\n\tPress enter once ready to start.\n\n")
-    
     print("\t\n(Step 1)\n\tGather the following Ingredients:")
     for ingredient in recipe["wet ingredients"].keys():
         print(f"\n\t {ingredient}")
@@ -159,8 +166,7 @@ def mix_ingredients(cookie_protocol):
     """Instructions for handing the dry ingredients"""
     recipe = COOKIE_PROTOCOL[cookie_protocol[1]]
     weight = cookie_protocol[0] * 90
-    next_line = "\n\n\tPress enter to move onto next step "
-    
+    next_line = "\n\n\tPress enter to move onto next step " 
     print("\t\n(Step 3)\n\tMeasure & place the following into the mixer:")
     for ingredient, amount in recipe["wet ingredients"].items():
         print(f"\n\t{ingredient} - {amount * weight}g")
@@ -197,7 +203,7 @@ def bake_and_store(cookie_protocol):
 
     print("\tsurface and place a baking sheet on top of each one.")
     input(next_line)
-    
+   
     print("\t\n(Step 15)\n\tPlace one scoop of cookie dough on the scale.")
     print("\tAdd or remove dough until it weights around 85-95g.")
     print("\tPlace the measured dough on the baking sheet.")
@@ -221,8 +227,6 @@ def bake_and_store(cookie_protocol):
     print("\tInspect the cookies and discard any burnt or disfigured ones.")
     while True:
         cookies_discarded = input("\tEnter the amount of cookies discarded:\t")
-        print(cookies_discarded)
-        print(cookies_made)
         if validate_range(cookies_discarded, 0, int(cookies_made)):
             print("\tEntered data valid!Please proceed!")
             if cookies_discarded == cookies_made:
@@ -253,6 +257,7 @@ def bake_and_store(cookie_protocol):
 
 
 def save_batch_data(batch_no):
+    """Saves batch data to the google sheet"""
     while True:
         entry = input(
             "\t Type yes/no if you wish to save the batch information: ")
@@ -279,18 +284,61 @@ def mixing_step(time, first_step_no):
     input("\n\tPress enter to move onto next step ")
 
 
+def generate_batch_no(no_cookies, recipe_no):
+    """Function generates a batch number based on the recipe and date"""
+    batch_parameters = []
+
+    past_batches = SHEET.worksheet("batches").get_all_values()
+    row_number = len(past_batches) + 1
+    number_for_batch = str(len(past_batches)).rjust(3, '0')
+    today = date.today()
+    today_readable = today.strftime("%d/%m/%Y")
+    batch_parameters.append(today_readable)
+
+    cookie_data = COOKIE_PROTOCOL[recipe_no]
+    recipe = cookie_data["name"]
+    batch_parameters.append(recipe)
+    
+    batch_number = (
+        cookie_data["abbreviation"]
+        + "-" + today_readable[8:] + "-" + (number_for_batch))
+    batch_parameters.append(batch_number)
+
+    print("\n\tB A T C H    I N F O R M A T I O N")
+    print(f"\n\tRecipe Name: {recipe}")
+    print(f"\n\tRecipe Amount: {no_cookies}")
+    print(f"\n\tToday is : {today}")
+    print(f"\n\tBatch Number: {batch_number}")
+
+    print("\n\tPlease complete the following information")
+    
+    scribe = input("\n\tEnter Scribe initials:")
+    if validate_data(scribe, "two letters for initials", )
+    batch_parameters.append(scribe)
+    
+    operator = input("\n\tEnter Operator initials:")
+    batch_parameters.append(operator)
+
+    return print(f"\n\tFollowing data generated{batch_parameters}\n\n")
+
+
 def main():
     """
     Runs the terminal functions
     """
-    #terminal_action = start_menu()
-    #if terminal_action == "a":
-        #protocol_info = select_recipe()
-    protocol_info = (11, "Raspberry and White Chocolate Cookies")
-   #start_manufacturing(protocol_info)
-    #mix_ingredients(protocol_info)
-    bake_and_store(protocol_info)
-    #save_batch_data(batch_no):
+    terminal_action = start_menu()
+    if terminal_action == "a":
+        protocol_info = select_recipe()
+        print(protocol_info)
+        generate_batch_no(protocol_info[0], protocol_info[1])
+        # protocol_info = (11, "Raspberry and White Chocolate Cookies")
+        start_manufacturing(protocol_info)
+        mix_ingredients(protocol_info)
+        bake_and_store(protocol_info)
+        #save_batch_data(batch_no):
 
 
 main()
+
+
+#generate_batch_no(11, COOKIE_PROTOCOL["2"])
