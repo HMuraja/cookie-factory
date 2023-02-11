@@ -79,7 +79,7 @@ def start_menu():
 
     while True:
         choice = input("\nSelect an action by entering a or b:\n")
-        if validate_data(choice, "a or b", "a", "b"):
+        if validate_data(choice, "a or b", ["a", "b"]):
             if choice == "a":
                 print("\nUploading available Recipes...\n")
             else:
@@ -90,18 +90,21 @@ def start_menu():
 
 def validate_data(data, answer_string, *expected_input):
     """
-    Checks if the data entered is any of the expected input, the only data
-    accepted. 
+    Expected_input tuple is unloaded into expected list.
+    Checks if the data entered is in the expected list.
+    Returns error if data can't be found. 
     """
+    expected_list = expected_input[0]
     try:
-        for expectation in expected_input:
+        for expectation in expected_list:
+            print(expectation)
             if data == expectation:
                 return True
         raise ValueError(
-            f"Please enter {answer_string}"
+            f"\n\tPlease enter {answer_string}"
             )
     except ValueError as error:
-        print(f"\nInvalid data! {error}, please try again.")
+        print(f"\n\tInvalid data! {error}, please try again.\n")
         return False  
 
 
@@ -131,7 +134,7 @@ def select_recipe():
         choice = int(input(
             "\nPlease select a recipe by entering the corresponding number: "))
         if validate_data(choice, "1, 2 or 3", 1, 2, 3):
-            cookies_dict= COOKIE_PROTOCOL[str(choice)]
+            cookies_dict  = COOKIE_PROTOCOL[str(choice)]
             recipe_name = cookies_dict["name"]
             break
     while True:
@@ -230,7 +233,7 @@ def bake_and_store(cookie_protocol):
             print("\tEntered data valid!Please proceed!")
             if cookies_discarded == cookies_made:
                 choice = input("All cookies dicarded? Type yes or no:")
-                if validate_data(choice, "yes or no"):
+                if validate_data(choice, "yes or no", ["yes", "no"]):
                     if choice == "yes":
                         print("Process finished!")
                         main()
@@ -260,21 +263,21 @@ def save_batch_data(batch_no):
     while True:
         entry = input(
             "\t Type yes/no if you wish to save the batch information: ")
-        if validate_data(entry, "yes or no", "yes", "no"):
+        if validate_data(entry, "yes or no", ["yes", "no"]):
             print(f"Save here the batch data{batch_no}")
             break
 
 
 def mixing_step(time, first_step_no):
     """Function for printing the  mixing steps"""
-    print(f"\t\n(Step {first_step_no})\n\tSet the mixer speed to number two and")
-    print(f"\tclose the guard and set the timer for {time} minutes.")
-    print("\tPress start.")
+    print(f"""\t\n(Step {first_step_no})\n\tSet the mixer speed to number two
+    and \tclose the guard and set the timer for {time} minutes.
+    \tPress start.""")
     input("\n\tPress enter to move onto next step ")
 
-    print(f"\t\n(Step {first_step_no + 1})\n\tOnce timer has finished and mixer")
-    print("\thas stopped. Open the guard and use the spatula")
-    print("\tto scrape the mixture on the sides down into the bottom.")
+    print(f"""\t\n(Step {first_step_no + 1})\n\tOnce timer has finished and
+     mixer \thas stopped. Open the guard and use the spatula \tto scrape the
+      mixture on the sides down into the bottom.""")
     input("\n\tPress enter to move onto next step ")
 
     print(f"\t\n(Step {first_step_no + 2})\n\tClose the guard, confirm speed")
@@ -303,11 +306,11 @@ def update_batch_data(cell, data):
 
 
 def get_employee_list():
-    employee_col = SHEET.worksheet("employees").col_values(2)
-    last_employee = employee_col[-1:]
-    rest_employees = employee_col[1:-1]
-    employee_list = ", ".join(rest_employees) + " or " + last_employee[0]
-    return employee_list
+    employee_list = SHEET.worksheet("employees").col_values(2)
+    last_employee = employee_list[-1:]
+    rest_employees = employee_list[1:-1]
+    employee_str = ", ".join(rest_employees) + " or " + last_employee[0]
+    return employee_str, employee_list[1:]
 
 
 def generate_batch_no(no_cookies, recipe_no):
@@ -338,14 +341,22 @@ def generate_batch_no(no_cookies, recipe_no):
 
     print("\n\n\tEMPLOYEE DATA")
     print("\tComplete data with the employee's initials listed below:")
-    print(f"\t{get_employee_list()}")
+    employees_data = get_employee_list()
+    print(f"\t{employees_data[0]}")
     
-    scribe = input("\tEnter Scribe initials: ")
-    batch_parameters.append(scribe)
+    while True:
+        scribe = input("\tEnter Scribe initials: ")
+        if validate_data(scribe, "one of the availble employee initials", employees_data[1]):
+            employees_data[1].remove(scribe)
+            batch_parameters.append(scribe)
+            break
     
-    operator = input("\tEnter Operator initials: ")
-    batch_parameters.append(operator)
-
+    while True:
+        operator = input("\tEnter Operator initials: ")
+        if validate_data(operator, "one of the availble employee initials", employees_data[1]):
+            batch_parameters.append(operator)
+            break
+    
     return print(f"\n\tFollowing data generated{batch_parameters}\n\n")
 
 
