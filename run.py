@@ -330,19 +330,20 @@ def generate_batch_no(no_cookies, recipe_no):
     batch_parameters.append(batch_number)
 
     print("\n\tB A T C H    I N F O R M A T I O N")
-    print(f"\n\tRecipe Name: {recipe}")
-    print(f"\n\tRecipe Amount: {no_cookies}")
-    print(f"\n\tToday is : {today}")
-    print(f"\n\tBatch Number: {batch_number}")
+    print("\n\tDATA GENERATED")
+    print(f"\tRecipe Name: {recipe}")
+    print(f"\tRecipe Amount: {no_cookies}")
+    print(f"\tDate: {today}")
+    print(f"\tBatch Number: {batch_number}")
 
-    print("\n\n\tInsert Employee Data")
-    print("\tUse the initials of the listed employess:")
-    print(f"\n\t{get_employee_list()}")
+    print("\n\n\tEMPLOYEE DATA")
+    print("\tComplete data with the employee's initials listed below:")
+    print(f"\t{get_employee_list()}")
     
-    scribe = input("\n\tEnter Scribe initials: ")
+    scribe = input("\tEnter Scribe initials: ")
     batch_parameters.append(scribe)
     
-    operator = input("\n\tEnter Operator initials: ")
+    operator = input("\tEnter Operator initials: ")
     batch_parameters.append(operator)
 
     return print(f"\n\tFollowing data generated{batch_parameters}\n\n")
