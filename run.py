@@ -148,7 +148,6 @@ def start_manufacturing(cookie_protocol):
     next_line = "\n\tPress enter to move onto next step "
 
     print("R U N N I N G   P R O T O C O L:")
-    print(f"\t{cookie_protocol[1]}")
     input("\n\tPress enter once ready to start.\n\n")
     print("\t\n(Step 1)\n\tGather the following Ingredients:")
     for ingredient in recipe["wet ingredients"].keys():
@@ -284,12 +283,38 @@ def mixing_step(time, first_step_no):
     input("\n\tPress enter to move onto next step ")
 
 
+def get_data():
+    batch_data = SHEET.worksheet("batches")
+
+    headers = batch_data.row_values(1)
+    print(headers)
+    batch_parameters = SHEET.worksheet("batches")
+    headers = batch_parameters.row_values(1)
+
+
+def update_batch_data(cell, data):
+    """
+    Update selected worksheet, add new row with the list data provided
+    """
+    print("Updating batch sheet")
+    selected_worksheet = SHEET.worksheet("batches")
+    selected_worksheet.update(cell, data)
+    print("Updated successfully.\n")
+
+
+def get_employee_list():
+    employee_col = SHEET.worksheet("employees").col_values(2)
+    last_employee = employee_col[-1:]
+    rest_employees = employee_col[1:-1]
+    employee_list = ", ".join(rest_employees) + " or " + last_employee[0]
+    return employee_list
+
+
 def generate_batch_no(no_cookies, recipe_no):
     """Function generates a batch number based on the recipe and date"""
     batch_parameters = []
 
     past_batches = SHEET.worksheet("batches").get_all_values()
-    row_number = len(past_batches) + 1
     number_for_batch = str(len(past_batches)).rjust(3, '0')
     today = date.today()
     today_readable = today.strftime("%d/%m/%Y")
@@ -310,13 +335,14 @@ def generate_batch_no(no_cookies, recipe_no):
     print(f"\n\tToday is : {today}")
     print(f"\n\tBatch Number: {batch_number}")
 
-    print("\n\tPlease complete the following information")
+    print("\n\n\tInsert Employee Data")
+    print("\tUse the initials of the listed employess:")
+    print(f"\n\t{get_employee_list()}")
     
-    scribe = input("\n\tEnter Scribe initials:")
-    if validate_data(scribe, "two letters for initials", )
+    scribe = input("\n\tEnter Scribe initials: ")
     batch_parameters.append(scribe)
     
-    operator = input("\n\tEnter Operator initials:")
+    operator = input("\n\tEnter Operator initials: ")
     batch_parameters.append(operator)
 
     return print(f"\n\tFollowing data generated{batch_parameters}\n\n")
@@ -326,15 +352,15 @@ def main():
     """
     Runs the terminal functions
     """
-    terminal_action = start_menu()
-    if terminal_action == "a":
-        protocol_info = select_recipe()
-        print(protocol_info)
-        generate_batch_no(protocol_info[0], protocol_info[1])
+    #terminal_action = start_menu()
+    #if terminal_action == "a":
+       # protocol_info = select_recipe()
+    protocol_info = (11, "1")
+    generate_batch_no(protocol_info[0], protocol_info[1])
         # protocol_info = (11, "Raspberry and White Chocolate Cookies")
-        start_manufacturing(protocol_info)
-        mix_ingredients(protocol_info)
-        bake_and_store(protocol_info)
+        #start_manufacturing(protocol_info)
+       # mix_ingredients(protocol_info)
+        #bake_and_store(protocol_info)
         #save_batch_data(batch_no):
 
 
