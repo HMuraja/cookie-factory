@@ -97,7 +97,6 @@ def validate_data(data, answer_string, *expected_input):
     expected_list = expected_input[0]
     try:
         for expectation in expected_list:
-            print(expectation)
             if data == expectation:
                 return True
         raise ValueError(
@@ -108,12 +107,12 @@ def validate_data(data, answer_string, *expected_input):
         return False  
 
 
-def validate_range(data, min_range, max_range):
+def validate_range(data, min_no, max_no):
     """Validates a data that should be within certain range"""
     try:
-        if (int(data) or data == "0") and int(data) in range(min_range, (max_range+1)):
+        if (int(data) or data == "0") and int(data) in range(min_no, max_no + 1):
             return True
-        raise ValueError(f"Please enter {min_range}-{max_range}")
+        raise ValueError(f"Please enter {min_no}-{max_no}")
     except ValueError as error:
         print(f"\nInvalid data! {error}, please try again.")
         return False
@@ -131,15 +130,15 @@ def select_recipe():
     print("\t2.	Raspberry and White Chocolate Cookies")
     print("\t3.	Peanut Butter Cookies")
     while True:
-        choice = int(input(
-            "\nPlease select a recipe by entering the corresponding number: "))
-        if validate_data(choice, "1, 2 or 3", 1, 2, 3):
-            cookies_dict  = COOKIE_PROTOCOL[str(choice)]
+        choice = input(
+            "\nPlease select a recipe by entering the corresponding number: ")
+        if validate_data(choice, "1, 2 or 3", ['1', '2', '3']):
+            cookies_dict = COOKIE_PROTOCOL[str(choice)]
             recipe_name = cookies_dict["name"]
             break
     while True:
-        amount = int(input(
-            "\nHow many cookies you plan to prepare min 10 max 100): "))
+        amount = input(
+            "\nHow many cookies you plan to prepare min 10 max 100): ")
         if validate_range(amount, 10, 100):
             print(f"\nUploading procedure for {amount} {recipe_name}...\n")
             return (amount, str(choice))       
@@ -150,8 +149,8 @@ def start_manufacturing(cookie_protocol):
     recipe = COOKIE_PROTOCOL[cookie_protocol[1]]
     next_line = "\n\tPress enter to move onto next step "
 
-    print("R U N N I N G   P R O T O C O L:")
     input("\n\tPress enter once ready to start.\n\n")
+    print("\tS T A R T I N G   P R O T O C O L:")
     print("\t\n(Step 1)\n\tGather the following Ingredients:")
     for ingredient in recipe["wet ingredients"].keys():
         print(f"\n\t {ingredient}")
@@ -167,7 +166,8 @@ def start_manufacturing(cookie_protocol):
 def mix_ingredients(cookie_protocol):
     """Instructions for handing the dry ingredients"""
     recipe = COOKIE_PROTOCOL[cookie_protocol[1]]
-    weight = cookie_protocol[0] * 90
+    weight = int(cookie_protocol[0]) * 90
+
     next_line = "\n\n\tPress enter to move onto next step " 
     print("\t\n(Step 3)\n\tMeasure & place the following into the mixer:")
     for ingredient, amount in recipe["wet ingredients"].items():
@@ -195,9 +195,9 @@ def mix_ingredients(cookie_protocol):
     input(next_line)
 
 
-def bake_and_store(cookie_protocol):
+def bake_and_store(cookie_protocol, batch_data):
     """Instructions to bake, store and label the cookies"""
-    weight = cookie_protocol[0] * 90
+    weight = int(cookie_protocol[0]) * 90
     next_line = "\n\tPress enter to move onto next step "
 
     #Count how many pans do you need, when each pan can take 10 cookies
@@ -215,7 +215,7 @@ def bake_and_store(cookie_protocol):
 
     while True:
         cookies_made = input("\n\tEnter the amount of cookies prepared:\t")
-        if validate_range(cookies_made, 0, cookie_protocol[0]):
+        if validate_range(cookies_made, 0, int(cookie_protocol[0])):
             print("\tData valid!Please proceed!")
             break
     print("\t\n(Step 16)\n\tPlace the tray in a trolley and transport them")
@@ -228,18 +228,20 @@ def bake_and_store(cookie_protocol):
     print("\tand place them in the trolley.")
     print("\tInspect the cookies and discard any burnt or disfigured ones.")
     while True:
-        cookies_discarded = input("\tEnter the amount of cookies discarded:\t")
+        cookies_discarded = input("\n\tEnter the amount of cookies discarded:\t")
         if validate_range(cookies_discarded, 0, int(cookies_made)):
-            print("\tEntered data valid!Please proceed!")
+            print("\n\tEntered data valid!Please proceed!")
             if cookies_discarded == cookies_made:
-                choice = input("All cookies dicarded? Type yes or no:")
-                if validate_data(choice, "yes or no", ["yes", "no"]):
-                    if choice == "yes":
-                        print("Process finished!")
-                        main()
-                    else:
-                        continue
-            break
+                while True:
+                    choice = input("\n\tAll cookies dicarded? Type yes or no: ")
+                    if validate_data(choice, "yes or no", ["yes", "no"]):
+                        if choice == "yes":
+                            batch_data.extend([cookies_made, cookies_discarded, "no"])
+                            print("\n\tProcess finished!")
+                            return batch_data
+                    break
+            else: 
+                break
     input(next_line)
 
     print("\t\n(Step19)\n\tTransport the trolley in the storage area")
@@ -249,13 +251,15 @@ def bake_and_store(cookie_protocol):
 
     print("\t\n(Step 20)\n\tOnce time is up, place cookies in storage boxes")
     print("\tand label each one with the following information:")
-    print("\tBatch Number:")
-    print(f"\tType: \t{cookie_protocol[1]}")
-    print("\tManufacturing date:")
+    print(f"\tBatch Number:\t\t{batch_data[2]}")
+    print(f"\tType: \t\t\t{batch_data[1]}")
+    print(f"\tManufacturing date: \t{batch_data[0]}")
     input(next_line)
-
+    
+    batch_data.extend([cookies_made, cookies_discarded, "yes"])
+    print(batch_data)
     print("\n\tProcess finished!")
-    return [cookies_made, cookies_discarded]
+    return batch_data
 
 
 def save_batch_data(batch_no):
@@ -270,19 +274,22 @@ def save_batch_data(batch_no):
 
 def mixing_step(time, first_step_no):
     """Function for printing the  mixing steps"""
-    print(f"""\t\n(Step {first_step_no})\n\tSet the mixer speed to number two
-    and \tclose the guard and set the timer for {time} minutes.
+    print(f"""\t\n
+    (Step {first_step_no})\n\tSet the mixer speed to number two and
+    \tclose the guard and set the timer for {time} minutes.
     \tPress start.""")
     input("\n\tPress enter to move onto next step ")
 
-    print(f"""\t\n(Step {first_step_no + 1})\n\tOnce timer has finished and
-     mixer \thas stopped. Open the guard and use the spatula \tto scrape the
-      mixture on the sides down into the bottom.""")
+    print(f"""\t\n
+    (Step {first_step_no + 1})\n\tOnce timer has finished and mixer
+    \thas stopped. Open the guard and use the spatula 
+    \tto scrape the mixture on the sides down into the bottom.""")
     input("\n\tPress enter to move onto next step ")
 
-    print(f"\t\n(Step {first_step_no + 2})\n\tClose the guard, confirm speed")
-    print(f"\tis fixed to 2 and set the timer for {time} minutes.")
-    print("\tPress start.")
+    print(f"""\t\n
+    (Step {first_step_no + 2})\n\tClose the guard, confirm the speed is
+    \tfixed to 2 and set the timer for {time} minutes.
+    \tPress start.""")
     input("\n\tPress enter to move onto next step ")
 
 
@@ -306,16 +313,18 @@ def update_batch_data(cell, data):
 
 
 def get_employee_list():
+    """
+    Returns a list of employees extracted from worksheet
+    """
     employee_list = SHEET.worksheet("employees").col_values(2)
-    last_employee = employee_list[-1:]
-    rest_employees = employee_list[1:-1]
-    employee_str = ", ".join(rest_employees) + " or " + last_employee[0]
-    return employee_str, employee_list[1:]
+    employees = employee_list[1:]
+    return employees
 
 
-def generate_batch_no(no_cookies, recipe_no):
+def display_batch_data(no_cookies, recipe_no):
     """Function generates a batch number based on the recipe and date"""
     batch_parameters = []
+    employee_list = get_employee_list()
 
     past_batches = SHEET.worksheet("batches").get_all_values()
     number_for_batch = str(len(past_batches)).rjust(3, '0')
@@ -334,46 +343,56 @@ def generate_batch_no(no_cookies, recipe_no):
 
     print("\n\tB A T C H    I N F O R M A T I O N")
     print("\n\tDATA GENERATED")
-    print(f"\tRecipe Name: {recipe}")
-    print(f"\tRecipe Amount: {no_cookies}")
-    print(f"\tDate: {today}")
-    print(f"\tBatch Number: {batch_number}")
+    print(f"\tRecipe Name:\t{recipe}")
+    print(f"\tRecipe Amount:\t{no_cookies}")
+    print(f"\tDate:\t\t{today}")
+    print(f"\tBatch Number:\t{batch_number}")
 
+    print(f"\n\tFollowing data generated{batch_parameters}\n\n")
+    return batch_parameters
+
+
+def request_employee_data(batch_parameters):
+    employee_list = get_employee_list()
     print("\n\n\tEMPLOYEE DATA")
-    print("\tComplete data with the employee's initials listed below:")
-    employees_data = get_employee_list()
-    print(f"\t{employees_data[0]}")
     
     while True:
+        print("\tComplete data with the employee's initials listed below:")
+        print(f"\t{', '.join(employee_list)}")
         scribe = input("\tEnter Scribe initials: ")
-        if validate_data(scribe, "one of the availble employee initials", employees_data[1]):
-            employees_data[1].remove(scribe)
+        if validate_data(scribe, "availble employee initials", employee_list):
+            employee_list.remove(scribe)
             batch_parameters.append(scribe)
             break
     
     while True:
+        print("\tComplete data with the employee's initials listed below:")
+        print(f"\t{', '.join(employee_list)}")
         operator = input("\tEnter Operator initials: ")
-        if validate_data(operator, "one of the availble employee initials", employees_data[1]):
+        if validate_data(operator, "availble employee initials", employee_list):
             batch_parameters.append(operator)
             break
-    
-    return print(f"\n\tFollowing data generated{batch_parameters}\n\n")
+    print(f"\n\tFollowing data generated{batch_parameters}\n\n")
+
+    return batch_parameters
 
 
 def main():
     """
     Runs the terminal functions
     """
-    #terminal_action = start_menu()
-    #if terminal_action == "a":
-       # protocol_info = select_recipe()
-    protocol_info = (11, "1")
-    generate_batch_no(protocol_info[0], protocol_info[1])
-        # protocol_info = (11, "Raspberry and White Chocolate Cookies")
-        #start_manufacturing(protocol_info)
-       # mix_ingredients(protocol_info)
-        #bake_and_store(protocol_info)
-        #save_batch_data(batch_no):
+    terminal_action = start_menu()
+    if terminal_action == "a":
+        protocol_info = select_recipe()
+        #protocol_info = (11, "1")
+    #protocol_info = ("55", "1")
+    #batch_data_2 = ['12/02/2023', 'Classic Cookies', 'cl-23-002', 'wm', 'es']
+        batch_data_1 = display_batch_data(protocol_info[0], protocol_info[1])
+        batch_data_2 = request_employee_data(batch_data_1)
+        start_manufacturing(protocol_info)
+        mix_ingredients(protocol_info)
+        batch_data_3 = bake_and_store(protocol_info, batch_data_2)
+        save_batch_data(batch_no)
 
 
 main()
