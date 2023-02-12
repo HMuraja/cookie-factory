@@ -1,9 +1,12 @@
 # 79 79 79 79 79 79 79 -- MAX width of your terminal-- 79 79 79 79 79 79 79 79
 # External libraries to access google sheets
 import math
+from datetime import date
+import os
 import gspread
 from google.oauth2.service_account import Credentials
-from datetime import date
+
+
 
 # Contstant variables for credentials and APIs
 SCOPE = [
@@ -71,8 +74,8 @@ def start_menu():
     Function prints out the main menu presenting the user the
     available activities
     """
-    print("---------COOKIE FACTORY TERMINAL---------")
-    print("Welcome to the Cookie Factory’s procedure terminal!")
+    print("---------C O O K I E   F A C T O R Y   T E R M I N A L---------")
+    print("\nWelcome to the Cookie Factory’s procedure terminal!")
     print("Available actions:")
     print("\t a.	Bake Cookies")
     print("\t b.	View Batches")
@@ -85,6 +88,8 @@ def start_menu():
             else:
                 print("\nUploading batch data...(Batches Code not buld yet)\n")
             break
+    
+    os.system('cls')
     return choice
 
 
@@ -124,21 +129,21 @@ def select_recipe():
     User input is validated by running user input trhough validate_data 
     function.
     """
-    print("---------Choose a Protocol---------")
+    print("---------P R O T O C O L S   A V A I L A B L E---------")
     print("\nAvailable recipes:")
     print("\t1.	Classic Cookies")
     print("\t2.	Raspberry and White Chocolate Cookies")
     print("\t3.	Peanut Butter Cookies")
     while True:
         choice = input(
-            "\nPlease select a recipe by entering the corresponding number: ")
+            "\nPlease select a recipe by entering the corresponding number: \n")
         if validate_data(choice, "1, 2 or 3", ['1', '2', '3']):
             cookies_dict = COOKIE_PROTOCOL[str(choice)]
             recipe_name = cookies_dict["name"]
             break
     while True:
         amount = input(
-            "\nHow many cookies you plan to prepare min 10 max 100): ")
+            "\nHow many cookies you plan to prepare min 10 max 100): \n")
         if validate_range(amount, 10, 100):
             print(f"\nUploading procedure for {amount} {recipe_name}...\n")
             return (amount, str(choice))       
@@ -147,10 +152,10 @@ def select_recipe():
 def start_manufacturing(cookie_protocol):
     """Step instructions to manufacture cookies"""
     recipe = COOKIE_PROTOCOL[cookie_protocol[1]]
-    next_line = "\n\tPress enter to move onto next step "
+    next_line = "\n\tPress enter to move onto next step \n"
 
-    input("\n\tPress enter once ready to start.\n\n")
-    print("\tS T A R T I N G   P R O T O C O L:")
+    input("\n\tPress enter once ready to start.\n")
+    print("\n\tS T A R T I N G   P R O T O C O L:")
     print("\t\n(Step 1)\n\tGather the following Ingredients:")
     for ingredient in recipe["wet ingredients"].keys():
         print(f"\n\t {ingredient}")
@@ -179,7 +184,8 @@ def mix_ingredients(cookie_protocol):
     print("\t\n(Step 7)\n\tWhile the mixer is running measure and place")
     print("\tfollowing ingredients to the measuring bowl:")
     for ingredient, amount in recipe["dry ingredients"].items():
-        print(f"\n\t{ingredient}\t\t{amount * weight}g")
+        ingredient_weight = round((amount * weight), 2)
+        print(f"\n\t{ingredient}\t\t{ingredient_weight}g")
 
     print("\t\n(Step 8)\n\tMix the dry ingredients using a whisker.")
     input(next_line)
@@ -214,7 +220,7 @@ def bake_and_store(cookie_protocol, batch_data):
     input(next_line)
 
     while True:
-        cookies_made = input("\n\tEnter the amount of cookies prepared:\t")
+        cookies_made = input("\n\tEnter the amount of cookies prepared:\n")
         if validate_range(cookies_made, 0, int(cookie_protocol[0])):
             print("\tData valid!Please proceed!")
             break
@@ -228,12 +234,12 @@ def bake_and_store(cookie_protocol, batch_data):
     print("\tand place them in the trolley.")
     print("\tInspect the cookies and discard any burnt or disfigured ones.")
     while True:
-        cookies_discarded = input("\n\tEnter the amount of cookies discarded:\t")
+        cookies_discarded = input("\n\tEnter the amount of cookies discarded:\n")
         if validate_range(cookies_discarded, 0, int(cookies_made)):
             print("\n\tEntered data valid!Please proceed!")
             if cookies_discarded == cookies_made:
                 while True:
-                    choice = input("\n\tAll cookies dicarded? Type yes or no: ")
+                    choice = input("\n\tAll cookies dicarded? Type yes or no: \n")
                     if validate_data(choice, "yes or no", ["yes", "no"]):
                         if choice == "yes":
                             batch_data.extend([cookies_made, cookies_discarded, "no"])
@@ -257,40 +263,28 @@ def bake_and_store(cookie_protocol, batch_data):
     input(next_line)
     
     batch_data.extend([cookies_made, cookies_discarded, "yes"])
-    print(batch_data)
-    print("\n\tProcess finished!")
     return batch_data
-
-
-def save_batch_data(batch_no):
-    """Saves batch data to the google sheet"""
-    while True:
-        entry = input(
-            "\t Type yes/no if you wish to save the batch information: ")
-        if validate_data(entry, "yes or no", ["yes", "no"]):
-            print(f"Save here the batch data{batch_no}")
-            break
 
 
 def mixing_step(time, first_step_no):
     """Function for printing the  mixing steps"""
-    print(f"""\t\n
+    print(f"""\n
     (Step {first_step_no})\n\tSet the mixer speed to number two and
     \tclose the guard and set the timer for {time} minutes.
     \tPress start.""")
-    input("\n\tPress enter to move onto next step ")
+    input("\n\tPress enter to move onto next step \n")
 
-    print(f"""\t\n
+    print(f"""\n
     (Step {first_step_no + 1})\n\tOnce timer has finished and mixer
     \thas stopped. Open the guard and use the spatula 
     \tto scrape the mixture on the sides down into the bottom.""")
-    input("\n\tPress enter to move onto next step ")
+    input("\n\tPress enter to move onto next step \n")
 
-    print(f"""\t\n
+    print(f"""\n
     (Step {first_step_no + 2})\n\tClose the guard, confirm the speed is
     \tfixed to 2 and set the timer for {time} minutes.
     \tPress start.""")
-    input("\n\tPress enter to move onto next step ")
+    input("\n\tPress enter to move onto next step \n")
 
 
 def get_data():
@@ -302,14 +296,17 @@ def get_data():
     headers = batch_parameters.row_values(1)
 
 
-def update_batch_data(cell, data):
+def save_batch_data(data_list):
     """
-    Update selected worksheet, add new row with the list data provided
+    Saves batch data to the batches worksheet
+    by adding the list data on a new row.
     """
-    print("Updating batch sheet")
+    print("\n\tUpdating batch sheet")
     selected_worksheet = SHEET.worksheet("batches")
-    selected_worksheet.update(cell, data)
-    print("Updated successfully.\n")
+    selected_worksheet.append_row(data_list)
+    print("\n\tBatch Data saved on the worksheet successfully.\n")
+    print("\n\tP R O C E S S   F I N I S H E D")
+    input("\tPress enter to return to main menu.\n")
 
 
 def get_employee_list():
@@ -322,9 +319,10 @@ def get_employee_list():
 
 
 def display_batch_data(no_cookies, recipe_no):
-    """Function generates a batch number based on the recipe and date"""
+    """Function generates a batch number based on the recipe and date.
+    Gathers all the information available to a list
+    all data genrated is displayed via print statements"""
     batch_parameters = []
-    employee_list = get_employee_list()
 
     past_batches = SHEET.worksheet("batches").get_all_values()
     number_for_batch = str(len(past_batches)).rjust(3, '0')
@@ -340,6 +338,7 @@ def display_batch_data(no_cookies, recipe_no):
         cookie_data["abbreviation"]
         + "-" + today_readable[8:] + "-" + (number_for_batch))
     batch_parameters.append(batch_number)
+    batch_parameters.append(no_cookies)
 
     print("\n\tB A T C H    I N F O R M A T I O N")
     print("\n\tDATA GENERATED")
@@ -348,18 +347,17 @@ def display_batch_data(no_cookies, recipe_no):
     print(f"\tDate:\t\t{today}")
     print(f"\tBatch Number:\t{batch_number}")
 
-    print(f"\n\tFollowing data generated{batch_parameters}\n\n")
     return batch_parameters
 
 
 def request_employee_data(batch_parameters):
     employee_list = get_employee_list()
-    print("\n\n\tEMPLOYEE DATA")
+    print("\n\n\tE M P L O Y E E    D A T A")
     
     while True:
         print("\tComplete data with the employee's initials listed below:")
         print(f"\t{', '.join(employee_list)}")
-        scribe = input("\tEnter Scribe initials: ")
+        scribe = input("\tEnter Scribe initials: \n")
         if validate_data(scribe, "availble employee initials", employee_list):
             employee_list.remove(scribe)
             batch_parameters.append(scribe)
@@ -368,11 +366,10 @@ def request_employee_data(batch_parameters):
     while True:
         print("\tComplete data with the employee's initials listed below:")
         print(f"\t{', '.join(employee_list)}")
-        operator = input("\tEnter Operator initials: ")
+        operator = input("\tEnter Operator initials: \n")
         if validate_data(operator, "availble employee initials", employee_list):
             batch_parameters.append(operator)
             break
-    print(f"\n\tFollowing data generated{batch_parameters}\n\n")
 
     return batch_parameters
 
@@ -392,10 +389,12 @@ def main():
         start_manufacturing(protocol_info)
         mix_ingredients(protocol_info)
         batch_data_3 = bake_and_store(protocol_info, batch_data_2)
-        save_batch_data(batch_no)
+        save_batch_data(batch_data_3)
+        main()
 
 
 main()
 
 
-#generate_batch_no(11, COOKIE_PROTOCOL["2"])
+#batch_data_3 = ['12/02/2023', 'Classic Cookies', 'cl-23-002', '11', 'es', 'lb', '11', '0', 'yes']
+#save_batch_data(batch_data_3)
