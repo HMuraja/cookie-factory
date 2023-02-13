@@ -152,11 +152,10 @@ def start_menu():
         choice = input("\nSelect an action by entering a or b:\n\t")
         if validate_data(choice, "a or b", ["a", "b"]):
             if choice == "a":
-                print("Uploading available Recipes...\n")
+                os.system('clear')
             else:
                 print("Uploading batch data...(Batches Code not buld yet)\n")
             break
-    os.system('cls')
     return choice
 
 
@@ -172,10 +171,10 @@ def validate_data(data, answer_string, *expected_input):
             if data == expectation:
                 return True
         raise ValueError(
-            f"\n\tPlease enter {answer_string}"
+            f"\n\ttPlease enter {answer_string}"
             )
     except ValueError as error:
-        print(f"\tINVALID DATA!\n\t {error}, please try again.\n")
+        print(f"\tINVALID DATA!{error}, please try again.\n")
         return False
 
 
@@ -203,18 +202,15 @@ def select_recipe():
     print("\t2.	Raspberry and White Chocolate Cookies")
     print("\t3.	Peanut Butter Cookies")
     while True:
-        choice = input(
-            """\nPlease select a recipe.
-            Enter the corresponding number: \n\t""")
+        print("\nPlease select a recipe.")
+        choice = input("Enter the corresponding number: \n\t")
         if validate_data(choice, "1, 2 or 3", ['1', '2', '3']):
-            cookies_dict = COOKIE_PROTOCOL[str(choice)]
-            recipe_name = cookies_dict["name"]
             break
     while True:
         amount = input(
-            "\nHow many cookies you plan to prepare min 10 max 100): \n")
+            "\nHow many cookies you plan to prepare min 10 max 100): \n\t")
         if validate_range(amount, 10, 100):
-            print(f"\nUploading procedure for {amount} {recipe_name}...\n")
+            os.system('clear')
             return (amount, str(choice))
 
 
@@ -267,11 +263,11 @@ def request_employee_data(batch_parameters):
     If valid data appended to batch_parameters list which is returned.
     """
     employee_list = get_employee_list()
-    print("\n\n\tEMPLOYEE    DATA")
+    print("\n\n\tEMPLOYEE DATA")
     while True:
         print("\tComplete data with the employee's initials listed below:")
         print(f"\t{', '.join(employee_list)}")
-        scribe = input("\tEnter Scribe initials: \n")
+        scribe = input("\tEnter Scribe initials: \n\t")
         if validate_data(scribe, "availble employee initials", employee_list):
             employee_list.remove(scribe)
             batch_parameters.append(scribe)
@@ -279,10 +275,12 @@ def request_employee_data(batch_parameters):
     while True:
         print("\tComplete data with the employee's initials listed below:")
         print(f"\t{', '.join(employee_list)}")
-        operator = input("\tEnter Operator initials: \n")
+        operator = input("\tEnter Operator initials: \n\t")
         if validate_data(
-                operator, "availble employee initials", employee_list):
+                operator, "available employee initials", employee_list):
             batch_parameters.append(operator)
+            input("\n\tPress ENTER when ready to run the instructions")
+            os.system('clear')
             break
 
     return batch_parameters
@@ -353,14 +351,18 @@ def label_info(batch_info):
     print(f"\tManufacturing date: \t{batch_info[0]}")
 
 
-def run_instructions(cookie_protocol, batch_info):
+def run_instructions(recipe_input, batch_info):
     """
     Prints out instructions from procedure dictionary
     """
-    weight = int(cookie_protocol[1]) * 90
-    recipe_no = cookie_protocol[1]
+    weight = int(recipe_input[1]) * 90
+    recipe_no = recipe_input[1]
+    recipe_details = COOKIE_PROTOCOL[recipe_no]
+    title = (recipe_details["name"]).upper()
 
-    print("\n\tS T A R T I N G   P R O T O C O L:")
+    title_gap = ''.join(title[i:i+1] for i in range(0, len(title), 1))
+
+    print(f"\n\tR U N N I N G   R E C I P E:\n\t\t{title}")
 
     for i in PROCEDURE_STEPS:
         instructions = PROCEDURE_STEPS[i]
@@ -381,7 +383,8 @@ def run_instructions(cookie_protocol, batch_info):
                 label_info(batch_info)
             else:
                 print(f"\n\t{i}")
-        input("\n\tPress ENTER to move onto next step \n\t")   
+        input("\n\tPress ENTER to move onto next step \n\t")
+        os.system('clear')
     batch_info.append("yes")
     return batch_info
 
@@ -396,7 +399,8 @@ def save_batch_data(data_list):
     selected_worksheet.append_row(data_list)
     print("\n\tBatch Data saved on the worksheet successfully.\n")
     print("\n\tP R O C E S S   F I N I S H E D")
-    input("\tPress enter to return to main menu.\n")
+    input("\tPress enter to return to main menu.\n\n")
+    os.system('clear')
 
 
 def main():
@@ -411,7 +415,6 @@ def main():
         batch_i_1 = display_batch_data(
             cookie_recipe[0], cookie_recipe[1])
         batch_i_2 = request_employee_data(batch_i_1)
-        input("\n\tWhen ready press ENTER to run the instructions.\n")
         final_data = run_instructions(cookie_recipe, batch_i_2)
         save_batch_data(final_data)
         main()
