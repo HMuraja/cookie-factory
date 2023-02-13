@@ -7,17 +7,21 @@ import gspread
 from google.oauth2.service_account import Credentials
 
 
-
 # Contstant variables for credentials and APIs
 SCOPE = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive.file",
     "https://www.googleapis.com/auth/drive"
     ]
+
 CREDS = Credentials.from_service_account_file('creds.json')
 SCOPED_CREDS = CREDS.with_scopes(SCOPE)
 GSPREAD_CLIENT = gspread.authorize(SCOPED_CREDS)
 SHEET = GSPREAD_CLIENT.open('cookie_batches')
+
+# Set up APIs
+batches = SHEET.worksheet('batches')
+batch_data = batches.get_all_values()
 
 # The three available recipes are listed below as constant variables
 COOKIE_PROTOCOL = {
@@ -60,22 +64,86 @@ COOKIE_PROTOCOL = {
             "Cacao Powder": 0.05,
             "Baking Powder": 0.003,
             "Baking Soda": 0.002,
-            "Reesee’s Chips": 0.19}}}
+            "Reesee's Chips": 0.19}}}
 
-# Set up APIs
-batches = SHEET.worksheet('batches')
-batch_data = batches.get_all_values()
+PROCEDURE_STEPS = {
+    "1": [
+        "Gather the following Ingredients:",
+        "list_w_i",
+        "list_d_i"],
+    "2": [
+        "Check that mixer and the work station is clean & free of particles."],
+    "3": [
+        "Measure & place the following into the mixer:"
+        "list_w_i"],
+    "4": [
+        "Set the mixer speed to number two and close the guard and",
+        "set the timer for 7 minutes. Press start."],
+    "5": [
+        "Once timer has finished and mixer thas stopped.",
+        "Open the guard.",
+        "With spatula scrape the mixture on the sides down into the bottom."],
+    "6": [
+        "Close the guard, confirm the speed is fixed to 2.",
+        "Set the timer for 2 minutes. Press start."],
+    "7": [
+        "While the mixer is running measure and place following ingredients",
+        "to the measuring bowl:",
+        "list_d_i"],
+    "8": [
+        "Mix the dry ingredients using a whisker."],
+    "9": [
+        "Once mixer timer has finished, open the guard.",
+        "Pour the dry ingredients on top of the wet ingredients."],
+    "10": [
+        "Set the mixer speed to number two and close the guard.",
+        "Set the timer for 5 minutes. Press start."],
+    "11": [
+        "Once timer has finished and mixer thas stopped.",
+        "Open the guard.",
+        "With spatula scrape the mixture on the sides down into the bottom."],
+    "12": [
+        "Close the guard, confirm the speed is fixed to 2.",
+        "Set the timer for 1 minutes. Press start."],
+    "13": [
+        "Open the guard and remove the mixing bowl from the machine.",
+        "place onto a trolley."],
+    "14": [
+        "tray no", "Place a baking sheet on top of each one"],
+    "15": [
+        "Place one scoop of cookie dough on the scale.",
+        "Add or remove dough until it weights around 85-95g.",
+        "Place the measured dough on the baking sheet.",
+        "Repeat the process until dough is finished.",
+        "IF the last cookie is less than 85 g, discard this dough.",
+        "made input"],
+    "16": [
+        "Place the tray in a trolley and transport them next to the ovens.",
+        "One by one place the pans in the oven.Set the timer for 12 minutes"],
+    "17": [
+        "Using oven-mittens remove the pans from the oven",
+        "Place them in the trolley.",
+        "Inspect the cookies and discard any burnt or disfigured ones.",
+        "discarded input"],
+    "18": [
+        "Transport the trolley in the storage area.",
+        "Label the trolley with batch number .Set the timer for 1 hour."],
+    "19": [
+        "Once time is up, place cookies in storage boxes",
+        "Label each one with the following information:",
+        "label info"]
+}
+
 
 # Script for the Cookie Factory Terminal starts from here
-
 
 def start_menu():
     """
     Function prints out the main menu presenting the user the
     available activities
     """
-    print("---------C O O K I E   F A C T O R Y   T E R M I N A L---------")
-    print("\nWelcome to the Cookie Factory’s procedure terminal!")
+    print("C O O K I E   F A C T O R Y   H O M E  M E N U")
+    print("\nWelcome to the Cookie Factory's procedure terminal!")
     print("Available actions:")
     print("\t a.	Bake Cookies")
     print("\t b.	View Batches")
@@ -84,9 +152,9 @@ def start_menu():
         choice = input("\nSelect an action by entering a or b:\n")
         if validate_data(choice, "a or b", ["a", "b"]):
             if choice == "a":
-                print("\nUploading available Recipes...\n")
+                print("Uploading available Recipes...\n")
             else:
-                print("\nUploading batch data...(Batches Code not buld yet)\n")
+                print("Uploading batch data...(Batches Code not buld yet)\n")
             break
     
     os.system('cls')
@@ -108,14 +176,15 @@ def validate_data(data, answer_string, *expected_input):
             f"\n\tPlease enter {answer_string}"
             )
     except ValueError as error:
-        print(f"\n\tInvalid data! {error}, please try again.\n")
+        print(f"\tInvalid data! {error}, please try again.\n")
         return False  
 
 
 def validate_range(data, min_no, max_no):
     """Validates a data that should be within certain range"""
     try:
-        if (int(data) or data == "0") and int(data) in range(min_no, max_no + 1):
+        if ((int(data) or data == "0") and
+            int(data) in range(min_no, max_no + 1)):
             return True
         raise ValueError(f"Please enter {min_no}-{max_no}")
     except ValueError as error:
@@ -129,7 +198,7 @@ def select_recipe():
     User input is validated by running user input trhough validate_data 
     function.
     """
-    print("---------P R O T O C O L S   A V A I L A B L E---------")
+    print("P R O T O C O L S   A V A I L A B L E")
     print("\nAvailable recipes:")
     print("\t1.	Classic Cookies")
     print("\t2.	Raspberry and White Chocolate Cookies")
@@ -146,154 +215,7 @@ def select_recipe():
             "\nHow many cookies you plan to prepare min 10 max 100): \n")
         if validate_range(amount, 10, 100):
             print(f"\nUploading procedure for {amount} {recipe_name}...\n")
-            return (amount, str(choice))       
-
-
-def start_manufacturing(cookie_protocol):
-    """Step instructions to manufacture cookies"""
-    recipe = COOKIE_PROTOCOL[cookie_protocol[1]]
-    next_line = "\n\tPress enter to move onto next step \n"
-
-    input("\n\tPress enter once ready to start.\n")
-    print("\n\tS T A R T I N G   P R O T O C O L:")
-    print("\t\n(Step 1)\n\tGather the following Ingredients:")
-    for ingredient in recipe["wet ingredients"].keys():
-        print(f"\n\t {ingredient}")
-    for ingredient in recipe["wet ingredients"].keys():
-        print(f"\n\t {ingredient}")
-    input(next_line)
-
-    print("\t\n(Step 2)\n\tCheck that mixer and the work station is clean &")
-    print("\tfree of particles.")
-    input(next_line)
-
-
-def mix_ingredients(cookie_protocol):
-    """Instructions for handing the dry ingredients"""
-    recipe = COOKIE_PROTOCOL[cookie_protocol[1]]
-    weight = int(cookie_protocol[0]) * 90
-
-    next_line = "\n\n\tPress enter to move onto next step " 
-    print("\t\n(Step 3)\n\tMeasure & place the following into the mixer:")
-    for ingredient, amount in recipe["wet ingredients"].items():
-        print(f"\n\t{ingredient} - {amount * weight}g")
-    input(next_line)
-
-    mixing_step(5, 4)
-
-    print("\t\n(Step 7)\n\tWhile the mixer is running measure and place")
-    print("\tfollowing ingredients to the measuring bowl:")
-    for ingredient, amount in recipe["dry ingredients"].items():
-        ingredient_weight = round((amount * weight), 2)
-        print(f"\n\t{ingredient}\t\t{ingredient_weight}g")
-
-    print("\t\n(Step 8)\n\tMix the dry ingredients using a whisker.")
-    input(next_line)
-
-    print("\n\t\n(Step 9)\n\tOnce mixer timer has finished, open the guard")
-    print("\tand pour the dry ingredients on top of the wet ingredients.")
-    input(next_line)
-
-    mixing_step(2, 10)
-
-    print("\t\n(Step 13)\n\tOpen the guard and remove the mixing bowl")
-    print("\tremove from the machine onto a trolley.")
-    input(next_line)
-
-
-def bake_and_store(cookie_protocol, batch_data):
-    """Instructions to bake, store and label the cookies"""
-    weight = int(cookie_protocol[0]) * 90
-    next_line = "\n\tPress enter to move onto next step "
-
-    #Count how many pans do you need, when each pan can take 10 cookies
-    print(f"\t\n(Steps 14)\n\tPlace {math.ceil(weight/90/10)} tray on the work")
-
-    print("\tsurface and place a baking sheet on top of each one.")
-    input(next_line)
-   
-    print("\t\n(Step 15)\n\tPlace one scoop of cookie dough on the scale.")
-    print("\tAdd or remove dough until it weights around 85-95g.")
-    print("\tPlace the measured dough on the baking sheet.")
-    print("\tRepeat the process until dough is finished.")
-    print("\tIF the last cookie is less than 85 g, discard this dough.")
-    input(next_line)
-
-    while True:
-        cookies_made = input("\n\tEnter the amount of cookies prepared:\n")
-        if validate_range(cookies_made, 0, int(cookie_protocol[0])):
-            print("\tData valid!Please proceed!")
-            break
-    print("\t\n(Step 16)\n\tPlace the tray in a trolley and transport them")
-    print("\tnext to the ovens.")
-    print("\tOne by one place the pans in the oven.")
-    print("\tSet the timer for 12 minutes.")
-    input(next_line)
-
-    print("\t\n(Step17)\n\tUsing oven-mittens remove the pans from the oven ")
-    print("\tand place them in the trolley.")
-    print("\tInspect the cookies and discard any burnt or disfigured ones.")
-    while True:
-        cookies_discarded = input("\n\tEnter the amount of cookies discarded:\n")
-        if validate_range(cookies_discarded, 0, int(cookies_made)):
-            print("\n\tEntered data valid!Please proceed!")
-            if cookies_discarded == cookies_made:
-                while True:
-                    choice = input("\n\tAll cookies dicarded? Type yes or no: \n")
-                    if validate_data(choice, "yes or no", ["yes", "no"]):
-                        if choice == "yes":
-                            batch_data.extend([cookies_made, cookies_discarded, "no"])
-                            print("\n\tProcess finished!")
-                            return batch_data
-                    break
-            else: 
-                break
-    input(next_line)
-
-    print("\t\n(Step19)\n\tTransport the trolley in the storage area")
-    print("\tlabel the trolley with batch number{batch_no}.")
-    print("\tSet the timer for 1 hour.")
-    input(next_line)
-
-    print("\t\n(Step 20)\n\tOnce time is up, place cookies in storage boxes")
-    print("\tand label each one with the following information:")
-    print(f"\tBatch Number:\t\t{batch_data[2]}")
-    print(f"\tType: \t\t\t{batch_data[1]}")
-    print(f"\tManufacturing date: \t{batch_data[0]}")
-    input(next_line)
-    
-    batch_data.extend([cookies_made, cookies_discarded, "yes"])
-    return batch_data
-
-
-def mixing_step(time, first_step_no):
-    """Function for printing the  mixing steps"""
-    print(f"""\n
-    (Step {first_step_no})\n\tSet the mixer speed to number two and
-    \tclose the guard and set the timer for {time} minutes.
-    \tPress start.""")
-    input("\n\tPress enter to move onto next step \n")
-
-    print(f"""\n
-    (Step {first_step_no + 1})\n\tOnce timer has finished and mixer
-    \thas stopped. Open the guard and use the spatula 
-    \tto scrape the mixture on the sides down into the bottom.""")
-    input("\n\tPress enter to move onto next step \n")
-
-    print(f"""\n
-    (Step {first_step_no + 2})\n\tClose the guard, confirm the speed is
-    \tfixed to 2 and set the timer for {time} minutes.
-    \tPress start.""")
-    input("\n\tPress enter to move onto next step \n")
-
-
-def get_data():
-    batch_data = SHEET.worksheet("batches")
-
-    headers = batch_data.row_values(1)
-    print(headers)
-    batch_parameters = SHEET.worksheet("batches")
-    headers = batch_parameters.row_values(1)
+            return (amount, str(choice))   
 
 
 def save_batch_data(data_list):
@@ -341,7 +263,7 @@ def display_batch_data(no_cookies, recipe_no):
     batch_parameters.append(no_cookies)
 
     print("\n\tB A T C H    I N F O R M A T I O N")
-    print("\n\tDATA GENERATED")
+    print("\n\tINITIAL DATA")
     print(f"\tRecipe Name:\t{recipe}")
     print(f"\tRecipe Amount:\t{no_cookies}")
     print(f"\tDate:\t\t{today}")
@@ -352,7 +274,7 @@ def display_batch_data(no_cookies, recipe_no):
 
 def request_employee_data(batch_parameters):
     employee_list = get_employee_list()
-    print("\n\n\tE M P L O Y E E    D A T A")
+    print("\n\n\tEMPLOYEE    DATA")
     
     while True:
         print("\tComplete data with the employee's initials listed below:")
@@ -374,27 +296,121 @@ def request_employee_data(batch_parameters):
     return batch_parameters
 
 
+def list_ingredients(recipe_no, ingredient_list):
+    """
+    List ingredients from start to finish
+    """
+    recipe = COOKIE_PROTOCOL[recipe_no]
+    for ingredient in recipe[ingredient_list].keys():
+        print(f"\n\t {ingredient}")
+
+
+def valid_made(batch_info):
+    """
+    Validates the made cookies amount.
+    """
+    recipe_amount = batch_info[3]
+    while True:
+        c_made = input("\n\tEnter the amount of cookies prepared:\n\t")
+        if validate_range(c_made, 0, int(recipe_amount)):
+            print("\tData valid! Please proceed!")
+            batch_info.extend([c_made])
+            break
+
+
+def valid_dis(batch_info):
+    """
+    Validates the discarded cookies amount entered.
+    If cookies made and discarded is the same run the program ends.
+    """
+    c_made = batch_info[6]
+
+    while True:
+        c_disc = input("\n\tEnter the amount of cookies discarded:\n\t")
+        if validate_range(c_disc, 0, int(c_made)):
+            print(f"Made cookies {c_made}")
+            if c_disc == c_made:
+                exit_early(batch_info)
+            else:
+                batch_info.extend([c_disc])
+                print("\n\tEntered data valid!Please proceed!")
+                break
+
+
+def exit_early(batch_info):
+    """
+    Confirm if entered cookie number was 0.
+    If yes exit program early.
+    """
+    while True:
+        choice = input("\n\tAll cookies dicarded? Type yes or no: \n\t")
+        if validate_data(choice, "yes or no", ["yes", "no"]):
+            if choice == "yes":
+                batch_info.extend([batch_info[6], "no"])
+                save_batch_data(batch_info)
+                main()
+            break
+
+
+def label_info(batch_info):
+    """
+    Lists the label infor for the process
+    Requires batch info for displaying the correct info
+    """
+    print(f"\n\tBatch Number:\t\t{batch_info[2]}")
+    print(f"\tType: \t\t\t{batch_info[1]}")
+    print(f"\tManufacturing date: \t{batch_info[0]}")
+
+
+def run_instructions(cookie_protocol, batch_info):
+    """
+    Prints out instructions from procedure dictionary
+    """
+    weight = int(cookie_protocol[1]) * 90
+    recipe_no = cookie_protocol[1]
+
+    print("\n\tS T A R T I N G   P R O T O C O L:")
+
+    for i in PROCEDURE_STEPS:
+        instructions = PROCEDURE_STEPS[i]
+        print(f"\n(Step {i})")
+        for i in instructions:
+            if i == "list_w_i":
+                list_ingredients(recipe_no, "wet ingredients")
+            elif i == "list_d_i":
+                list_ingredients(recipe_no, "dry ingredients")
+            elif i == "tray no":
+                tray_no = math.ceil(weight/90/10)
+                print(f"\tPlace {tray_no} tray on the work surface.")
+            elif i == "made input":
+                valid_made(batch_info)
+            elif i == "discarded input":
+                valid_dis(batch_info)
+            elif i == "label info":
+                label_info(batch_info)
+            else:
+                print(f"\n\t{i}")
+        input("\n\tPress ENTER to move onto next step \n\t")   
+    batch_info.append("yes")
+    print("\tP R O C E S S    F I N I S H E D")
+    return batch_info
+
+
 def main():
     """
     Runs the terminal functions
     """
     terminal_action = start_menu()
     if terminal_action == "a":
-        protocol_info = select_recipe()
-        #protocol_info = (11, "1")
-    #protocol_info = ("55", "1")
-    #batch_data_2 = ['12/02/2023', 'Classic Cookies', 'cl-23-002', 'wm', 'es']
-        batch_data_1 = display_batch_data(protocol_info[0], protocol_info[1])
-        batch_data_2 = request_employee_data(batch_data_1)
-        start_manufacturing(protocol_info)
-        mix_ingredients(protocol_info)
-        batch_data_3 = bake_and_store(protocol_info, batch_data_2)
-        save_batch_data(batch_data_3)
+        cookie_recipe = select_recipe()
+    # protocol_info = ("55", "1")
+    # batch_data_2 = ['12/02/2023', 'Classic Cookies', 'cl-23-002', 'wm', 'es']
+        batch_i_1 = display_batch_data(
+            cookie_recipe[0], cookie_recipe[1])
+        batch_i_2 = request_employee_data(batch_i_1)
+        input("\n\tWhen ready press ENTER to run the instructions.\n")
+        final_data = run_instructions(cookie_recipe, batch_i_2)
+        save_batch_data(final_data)
         main()
 
-
 main()
-
-
-#batch_data_3 = ['12/02/2023', 'Classic Cookies', 'cl-23-002', '11', 'es', 'lb', '11', '0', 'yes']
-#save_batch_data(batch_data_3)
