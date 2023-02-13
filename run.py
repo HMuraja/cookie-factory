@@ -44,8 +44,8 @@ COOKIE_PROTOCOL = {
         "wet ingredients": {
             "Butter": 0.16,
             "Vanilla Extract": 0.005,
-            "Raspberries": 0.10, 
-            "White Sugar": 0.16}, 
+            "Raspberries": 0.10,
+            "White Sugar": 0.16},
         "dry ingredients": {
             "Flour": 0.38,
             "Baking Powder": 0.003,
@@ -149,14 +149,13 @@ def start_menu():
     print("\t b.	View Batches")
 
     while True:
-        choice = input("\nSelect an action by entering a or b:\n")
+        choice = input("\nSelect an action by entering a or b:\n\t")
         if validate_data(choice, "a or b", ["a", "b"]):
             if choice == "a":
                 print("Uploading available Recipes...\n")
             else:
                 print("Uploading batch data...(Batches Code not buld yet)\n")
             break
-    
     os.system('cls')
     return choice
 
@@ -165,7 +164,7 @@ def validate_data(data, answer_string, *expected_input):
     """
     Expected_input tuple is unloaded into expected list.
     Checks if the data entered is in the expected list.
-    Returns error if data can't be found. 
+    Returns error if data can't be found.
     """
     expected_list = expected_input[0]
     try:
@@ -176,26 +175,26 @@ def validate_data(data, answer_string, *expected_input):
             f"\n\tPlease enter {answer_string}"
             )
     except ValueError as error:
-        print(f"\tInvalid data! {error}, please try again.\n")
-        return False  
+        print(f"\tINVALID DATA!\n\t {error}, please try again.\n")
+        return False
 
 
 def validate_range(data, min_no, max_no):
     """Validates a data that should be within certain range"""
     try:
         if ((int(data) or data == "0") and
-            int(data) in range(min_no, max_no + 1)):
+                int(data) in range(min_no, max_no + 1)):
             return True
         raise ValueError(f"Please enter {min_no}-{max_no}")
     except ValueError as error:
-        print(f"\nInvalid data! {error}, please try again.")
+        print(f"\n\tINVALID DATA!\n\t{error}, please try again.")
         return False
 
 
 def select_recipe():
     """
     Displays all available recipes and expect user input.
-    User input is validated by running user input trhough validate_data 
+    User input is validated by running user input trhough validate_data
     function.
     """
     print("P R O T O C O L S   A V A I L A B L E")
@@ -205,7 +204,8 @@ def select_recipe():
     print("\t3.	Peanut Butter Cookies")
     while True:
         choice = input(
-            "\nPlease select a recipe by entering the corresponding number: \n")
+            """\nPlease select a recipe.
+            Enter the corresponding number: \n\t""")
         if validate_data(choice, "1, 2 or 3", ['1', '2', '3']):
             cookies_dict = COOKIE_PROTOCOL[str(choice)]
             recipe_name = cookies_dict["name"]
@@ -215,35 +215,15 @@ def select_recipe():
             "\nHow many cookies you plan to prepare min 10 max 100): \n")
         if validate_range(amount, 10, 100):
             print(f"\nUploading procedure for {amount} {recipe_name}...\n")
-            return (amount, str(choice))   
-
-
-def save_batch_data(data_list):
-    """
-    Saves batch data to the batches worksheet
-    by adding the list data on a new row.
-    """
-    print("\n\tUpdating batch sheet")
-    selected_worksheet = SHEET.worksheet("batches")
-    selected_worksheet.append_row(data_list)
-    print("\n\tBatch Data saved on the worksheet successfully.\n")
-    print("\n\tP R O C E S S   F I N I S H E D")
-    input("\tPress enter to return to main menu.\n")
-
-
-def get_employee_list():
-    """
-    Returns a list of employees extracted from worksheet
-    """
-    employee_list = SHEET.worksheet("employees").col_values(2)
-    employees = employee_list[1:]
-    return employees
+            return (amount, str(choice))
 
 
 def display_batch_data(no_cookies, recipe_no):
-    """Function generates a batch number based on the recipe and date.
+    """
+    Function generates a batch number based on the recipe and date.
     Gathers all the information available to a list
-    all data genrated is displayed via print statements"""
+    all data genrated is displayed via print statements
+    """
     batch_parameters = []
 
     past_batches = SHEET.worksheet("batches").get_all_values()
@@ -255,7 +235,6 @@ def display_batch_data(no_cookies, recipe_no):
     cookie_data = COOKIE_PROTOCOL[recipe_no]
     recipe = cookie_data["name"]
     batch_parameters.append(recipe)
-    
     batch_number = (
         cookie_data["abbreviation"]
         + "-" + today_readable[8:] + "-" + (number_for_batch))
@@ -272,10 +251,23 @@ def display_batch_data(no_cookies, recipe_no):
     return batch_parameters
 
 
+def get_employee_list():
+    """
+    Returns a list of employees extracted from worksheet
+    """
+    employee_list = SHEET.worksheet("employees").col_values(2)
+    employees = employee_list[1:]
+    return employees
+
+
 def request_employee_data(batch_parameters):
+    """
+    Requests user to enter employee initials for requested role.
+    Runs validation for the enteres information.
+    If valid data appended to batch_parameters list which is returned.
+    """
     employee_list = get_employee_list()
     print("\n\n\tEMPLOYEE    DATA")
-    
     while True:
         print("\tComplete data with the employee's initials listed below:")
         print(f"\t{', '.join(employee_list)}")
@@ -284,12 +276,12 @@ def request_employee_data(batch_parameters):
             employee_list.remove(scribe)
             batch_parameters.append(scribe)
             break
-    
     while True:
         print("\tComplete data with the employee's initials listed below:")
         print(f"\t{', '.join(employee_list)}")
         operator = input("\tEnter Operator initials: \n")
-        if validate_data(operator, "availble employee initials", employee_list):
+        if validate_data(
+                operator, "availble employee initials", employee_list):
             batch_parameters.append(operator)
             break
 
@@ -328,12 +320,11 @@ def valid_dis(batch_info):
     while True:
         c_disc = input("\n\tEnter the amount of cookies discarded:\n\t")
         if validate_range(c_disc, 0, int(c_made)):
-            print(f"Made cookies {c_made}")
             if c_disc == c_made:
                 exit_early(batch_info)
             else:
                 batch_info.extend([c_disc])
-                print("\n\tEntered data valid!Please proceed!")
+                print("\n\tData valid! Please proceed!")
                 break
 
 
@@ -392,8 +383,20 @@ def run_instructions(cookie_protocol, batch_info):
                 print(f"\n\t{i}")
         input("\n\tPress ENTER to move onto next step \n\t")   
     batch_info.append("yes")
-    print("\tP R O C E S S    F I N I S H E D")
     return batch_info
+
+
+def save_batch_data(data_list):
+    """
+    Saves batch data to the batches worksheet
+    by adding the list data on a new row.
+    """
+    print("\n\tUpdating batch sheet")
+    selected_worksheet = SHEET.worksheet("batches")
+    selected_worksheet.append_row(data_list)
+    print("\n\tBatch Data saved on the worksheet successfully.\n")
+    print("\n\tP R O C E S S   F I N I S H E D")
+    input("\tPress enter to return to main menu.\n")
 
 
 def main():
@@ -412,5 +415,6 @@ def main():
         final_data = run_instructions(cookie_recipe, batch_i_2)
         save_batch_data(final_data)
         main()
+
 
 main()
