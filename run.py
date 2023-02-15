@@ -25,6 +25,7 @@ batch_data = batches.get_all_values()
 
 # Script for the Cookie Factory Terminal starts from here
 
+
 def start_menu():
     """
     Function prints out the main menu presenting the user the
@@ -84,13 +85,14 @@ def select_recipe():
     Displays all available recipes and expect user input.
     User input is validated by running user input trhough validate_data
     function.
-    """  
+    """
     print("R E C I P E S    A V A I L A B L E\n")
     print("\t Classic Cookies - rw")
     print("\t Raspberry and White Chocolate Cookies - rw")
     print("\t Peanut Butter Cookies - pb")
     while True:
-        recipe_choice = input("\n Select recipe by entereing cl, rw or pb:\n\t")
+        recipe_choice = input(
+            "\n Select recipe by entereing cl, rw or pb:\n\t")
         if validate_data(recipe_choice, "cl, rw or pb", ['cl', 'rw', 'pb']):
             if recipe_choice == "cl":
                 name = "Classic Cookies"
@@ -107,32 +109,11 @@ def select_recipe():
             return (name, recipe_choice, amount)
 
 
-def generate_date():
-    """
-    Generates today's date.
-    """
-    today = date.today().today.strftime("%d/%m/%Y")
-    return today
-
-
-def generate_batch_no(abbreviation, date_string):
-    """
-    Function generates a batch number based on the recipe and date.
-    Gathers all the information available to a list
-    all data genrated is displayed via print statements
-    """
-    past_batches = SHEET.worksheet("batches").get_all_values()
-    number_for_batch = str(len(past_batches)).rjust(3, '0')
-    batch_number = (
-        abbreviation + "-" + date_string[8:] + "-" + (number_for_batch))
-    return batch_number
-
-
 def input_employees():
     """
     Requests user to enter employee initials for requested role.
     Runs validation for the enteres information.
-    If valid data appended to batch_parameters list which is returned.
+    List with initials added.
     """
     employee_list = (SHEET.worksheet("employees").col_values(2))[1:]
     employees = []
@@ -150,6 +131,27 @@ def input_employees():
     input("\n\tPress ENTER when ready to run the instructions")
     os.system('clear')
     return employees
+
+
+def generate_date():
+    """
+    Generates today's date.
+    """
+    today = date.today().strftime("%d/%m/%Y")
+    return today
+
+
+def generate_batch_no(abbreviation, date_string):
+    """
+    Function generates a batch number based on the recipe and date.
+    Gathers all the information available to a list
+    all data genrated is displayed via print statements
+    """
+    past_batches = SHEET.worksheet("batches").get_all_values()
+    number_for_batch = str(len(past_batches)).rjust(3, '0')
+    batch_number = (
+        abbreviation + "-" + date_string[8:] + "-" + (number_for_batch))
+    return batch_number
 
 
 def list_ingredients(batch_info, ingredient_list, add_weight):
@@ -279,6 +281,35 @@ def save_batch_data(data_list):
     os.system('clear')
 
 
+class CookieBatch:
+    """
+    Creates an instace of a batch
+    """
+    def __init__(
+            self, batch_date, recipe, recipe_abbreavion, amount, scribe,
+            operator):
+        self.batch_date = batch_date
+        self.recipe = recipe
+        self.recipe_abbreavion = recipe_abbreavion
+        self.amount = amount
+        self.scribe = scribe
+        self.operator = operator
+
+    def batch_no(self):
+        """
+        Generates batch number by joining recipe_abbreviation,
+        manufacturing years two last numbers and the batch count.
+        For example, for Classic Cookies, baked on 15/02/2023 and batch
+        being 10th ever manufactured the batch number would be cl-23-010.
+        """
+        past_batches = SHEET.worksheet("batches").get_all_values()
+        batch_count = str(len(past_batches)).rjust(3, '0')
+        date_abr = self.batch_date[8:]
+        batch_number = (
+            self.recipe_abbreavion + "-" + date_abr + "-" + (batch_count))
+        return batch_number
+
+
 def main():
     """
     Runs the terminal functions
@@ -286,11 +317,11 @@ def main():
     terminal_action = start_menu()
     if terminal_action == "a":
         recipe_name, recipe_id, cookie_no = select_recipe()
-        process_scribe, process_operator = input_employees()
-        print(process_scribe, process_operator)
-        todays_date = generate_date()
-        batch_no = generate_batch_no(recipe_id, date)
-        
+        scribe, operator = input_employees()
+        batch_date = generate_date()
+        manufactured_batch = CookieBatch(
+            batch_date, recipe_name, recipe_id, cookie_no, scribe, operator)
+        print(manufactured_batch.batch_no())
     # protocol_info = ("55", "1")
     # batch_data_2 = ['12/02/2023', 'Classic Cookies', 'cl-23-002', 'wm', 'es']
         #batch_i_1 = display_batch_data(
