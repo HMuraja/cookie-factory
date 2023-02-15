@@ -115,7 +115,7 @@ def generate_date():
     return today
 
 
-def generate_batch_number(abbreviation, date_string):
+def generate_batch_no(abbreviation, date_string):
     """
     Function generates a batch number based on the recipe and date.
     Gathers all the information available to a list
@@ -128,42 +128,28 @@ def generate_batch_number(abbreviation, date_string):
     return batch_number
 
 
-def get_employee_list():
-    """
-    Returns a list of employees extracted from worksheet
-    """
-    employee_list = SHEET.worksheet("employees").col_values(2)
-    employees = employee_list[1:]
-    return employees
-
-
-def request_employee_data(batch_parameters):
+def input_employees():
     """
     Requests user to enter employee initials for requested role.
     Runs validation for the enteres information.
     If valid data appended to batch_parameters list which is returned.
     """
-    employee_list = get_employee_list()
-    print("\n\n\tEMPLOYEE DATA")
-    while True:
-        print("\tComplete data with the employee's initials listed")
-        print(f"\n\tAvailable Employees: {', '.join(employee_list)}")
-        scribe = input("\tEnter Scribe initials: \n\t")
-        if validate_data(scribe, "availble employee initials", employee_list):
-            employee_list.remove(scribe)
-            batch_parameters.append(scribe)
-            break
-    while True:
-        print(f"\n\tAvailable Employees: {', '.join(employee_list)}")
-        operator = input("\tEnter Operator initials: \n\t")
-        if validate_data(
-                operator, "available employee initials", employee_list):
-            batch_parameters.append(operator)
-            input("\n\tPress ENTER when ready to run the instructions")
-            os.system('clear')
-            break
-
-    return batch_parameters
+    employee_list = (SHEET.worksheet("employees").col_values(2))[1:]
+    employees = []
+    roles = ["Scribe", "Operator"]
+    print("\n\tE M P L O Y E E   D A T A")
+    print("\n\tAdd involved employee's initials after the role")
+    for role in roles:
+        while True:
+            print(f"\tAvailable Employees: {', '.join(employee_list)}")
+            choice = input(f"\n\tProcess {role}: \n\t")
+            if validate_data(choice, "listed employee initals", employee_list):
+                employee_list.remove(choice)
+                employees.append(choice)
+                break
+    input("\n\tPress ENTER when ready to run the instructions")
+    os.system('clear')
+    return employees
 
 
 def list_ingredients(batch_info, ingredient_list, add_weight):
@@ -300,9 +286,11 @@ def main():
     terminal_action = start_menu()
     if terminal_action == "a":
         recipe_name, recipe_id, cookie_no = select_recipe()
-        print(recipe_name, recipe_id, cookie_no)
-        #todays_date = generate_date()
-        #batch_no = generate_batch_number(recipe_id, date)
+        process_scribe, process_operator = input_employees()
+        print(process_scribe, process_operator)
+        todays_date = generate_date()
+        batch_no = generate_batch_no(recipe_id, date)
+        
     # protocol_info = ("55", "1")
     # batch_data_2 = ['12/02/2023', 'Classic Cookies', 'cl-23-002', 'wm', 'es']
         #batch_i_1 = display_batch_data(
