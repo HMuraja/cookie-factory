@@ -23,117 +23,6 @@ SHEET = GSPREAD_CLIENT.open('cookie_batches')
 batches = SHEET.worksheet('batches')
 batch_data = batches.get_all_values()
 
-# The three available recipes are listed below as constant variables
-COOKIE_PROTOCOL = {
-    "1": {
-        "abbreviation": "cl",
-        "name": "Classic Cookies",
-        "wet ingredients": {
-            "Butter": 0.16,
-            "Vanilla Extract": 0.005,
-            "Egg Mix": 0.10,
-            "Light Brown Sugar": 0.16},
-        "dry ingredients": {
-            "Flour": 0.38,
-            "Baking Powder": 0.003,
-            "Baking Soda": 0.002,
-            "White Chocolate": 0.19}},
-    "2": {
-        "abbreviation": "rw",
-        "name": "Raspberry and White Chocolate Cookies",
-        "wet ingredients": {
-            "Butter": 0.16,
-            "Vanilla Extract": 0.005,
-            "Raspberries": 0.10,
-            "White Sugar": 0.16},
-        "dry ingredients": {
-            "Flour": 0.38,
-            "Baking Powder": 0.003,
-            "Baking Soda": 0.002,
-            "White Chocolate": 0.19}},
-    "3": {
-        "abbreviation": "rw",
-        "name": "Peanut Butter Cookies",
-        "wet ingredients": {
-            "Butter": 0.18,
-            "Vanilla Extract": 0.005,
-            "Egg Mix": 0.11,
-            "Light Brown Sugar": 0.16},
-        "dry ingredients": {
-            "Flour": 0.30,
-            "Cacao Powder": 0.05,
-            "Baking Powder": 0.003,
-            "Baking Soda": 0.002,
-            "Reesee's Chips": 0.19}}}
-
-PROCEDURE_STEPS = {
-    "1": [
-        "Gather the following Ingredients:",
-        "list_all"],
-    "2": [
-        "Check that mixer and the work station is clean & free of particles."],
-    "3": [
-        "Measure & place the following into the mixer:",
-        "list_w_i"],
-    "4": [
-        "Set the mixer speed to number two and close the guard and",
-        "set the timer for 7 minutes. Press start."],
-    "5": [
-        "Once timer has finished and mixer thas stopped.",
-        "Open the guard.",
-        "With spatula scrape the mixture on the sides down into the bottom."],
-    "6": [
-        "Close the guard, confirm the speed is fixed to 2.",
-        "Set the timer for 2 minutes. Press start."],
-    "7": [
-        "While the mixer is running measure and place following ingredients",
-        "to the measuring bowl:",
-        "list_d_i"],
-    "8": [
-        "Mix the dry ingredients using a whisker."],
-    "9": [
-        "Once mixer timer has finished, open the guard.",
-        "Pour the dry ingredients on top of the wet ingredients."],
-    "10": [
-        "Set the mixer speed to number two and close the guard.",
-        "Set the timer for 5 minutes. Press start."],
-    "11": [
-        "Once timer has finished and mixer thas stopped.",
-        "Open the guard.",
-        "With spatula scrape the mixture on the sides down into the bottom."],
-    "12": [
-        "Close the guard, confirm the speed is fixed to 2.",
-        "Set the timer for 1 minutes. Press start."],
-    "13": [
-        "Open the guard and remove the mixing bowl from the machine.",
-        "place onto a trolley."],
-    "14": [
-        "tray no", "Place a baking sheet on top of each one"],
-    "15": [
-        "Place one scoop of cookie dough on the scale.",
-        "Add or remove dough until it weights around 85-95g.",
-        "Place the measured dough on the baking sheet.",
-        "Repeat the process until dough is finished.",
-        "IF the last cookie is less than 85 g, discard this dough.",
-        "made input"],
-    "16": [
-        "Place the tray in a trolley and transport them next to the ovens.",
-        "One by one place the pans in the oven.Set the timer for 12 minutes"],
-    "17": [
-        "Using oven-mittens remove the pans from the oven",
-        "Place them in the trolley.",
-        "Inspect the cookies and discard any burnt or disfigured ones.",
-        "discarded input"],
-    "18": [
-        "Transport the trolley in the storage area.",
-        "Label the trolley with batch number .Set the timer for 1 hour."],
-    "19": [
-        "Once time is up, place cookies in storage boxes",
-        "Label each one with the following information:",
-        "label info"]
-}
-
-
 # Script for the Cookie Factory Terminal starts from here
 
 def start_menu():
@@ -203,48 +92,39 @@ def select_recipe():
     print("\t3.	Peanut Butter Cookies")
     while True:
         print("\nPlease select a recipe.")
-        choice = input("Enter the corresponding number: \n\t")
-        if validate_data(choice, "1, 2 or 3", ['1', '2', '3']):
+        recipe_choice = input("Enter the corresponding number: \n\t")
+        if validate_data(recipe_choice, "1, 2 or 3", ['1', '2', '3']):
             break
     while True:
         amount = input(
             "\nHow many cookies you plan to prepare min 10 max 100): \n\t")
         if validate_range(amount, 10, 100):
             os.system('clear')
-            return (amount, str(choice))
+            return (recipe_choice, amount)
 
 
-def display_batch_data(no_cookies, recipe_no):
+def generate_date():
+    """
+    Generates today's date.
+    """
+    today = date.today().today.strftime("%d/%m/%Y")
+    return today
+
+
+def generate_batch_number(recipe_no, date_string):
     """
     Function generates a batch number based on the recipe and date.
     Gathers all the information available to a list
     all data genrated is displayed via print statements
     """
-    batch_parameters = []
-
     past_batches = SHEET.worksheet("batches").get_all_values()
     number_for_batch = str(len(past_batches)).rjust(3, '0')
-    today = date.today()
-    today_readable = today.strftime("%d/%m/%Y")
-    batch_parameters.append(today_readable)
 
     cookie_data = COOKIE_PROTOCOL[recipe_no]
-    recipe = cookie_data["name"]
-    batch_parameters.append(recipe)
     batch_number = (
         cookie_data["abbreviation"]
-        + "-" + today_readable[8:] + "-" + (number_for_batch))
-    batch_parameters.append(batch_number)
-    batch_parameters.append(no_cookies)
-
-    print("\n\tB A T C H    I N F O R M A T I O N")
-    print("\n\tINITIAL DATA")
-    print(f"\tRecipe Name:\t{recipe}")
-    print(f"\tRecipe Amount:\t{no_cookies}")
-    print(f"\tDate:\t\t{today}")
-    print(f"\tBatch Number:\t{batch_number}")
-
-    return batch_parameters
+        + "-" + date_string[8:] + "-" + (number_for_batch))
+    return batch_number
 
 
 def get_employee_list():
@@ -418,11 +298,13 @@ def main():
     """
     terminal_action = start_menu()
     if terminal_action == "a":
-        cookie_recipe = select_recipe()
+        recipe_no, cookie_no = select_recipe()
+        todays_date = generate_date()
+        batch_no = generate_batch_number(cookie_no, date)
     # protocol_info = ("55", "1")
     # batch_data_2 = ['12/02/2023', 'Classic Cookies', 'cl-23-002', 'wm', 'es']
         batch_i_1 = display_batch_data(
-            cookie_recipe[0], cookie_recipe[1])
+            cookie_recipe[0], cookie_recipe[1], todays_date)
         batch_i_2 = request_employee_data(batch_i_1)
         final_data = run_instructions(cookie_recipe, batch_i_2)
         save_batch_data(final_data)
