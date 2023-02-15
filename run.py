@@ -69,12 +69,11 @@ COOKIE_PROTOCOL = {
 PROCEDURE_STEPS = {
     "1": [
         "Gather the following Ingredients:",
-        "list_w_i",
-        "list_d_i"],
+        "list_all"],
     "2": [
         "Check that mixer and the work station is clean & free of particles."],
     "3": [
-        "Measure & place the following into the mixer:"
+        "Measure & place the following into the mixer:",
         "list_w_i"],
     "4": [
         "Set the mixer speed to number two and close the guard and",
@@ -171,7 +170,7 @@ def validate_data(data, answer_string, *expected_input):
             if data == expectation:
                 return True
         raise ValueError(
-            f"\n\ttPlease enter {answer_string}"
+            f"\n\tPlease enter {answer_string}"
             )
     except ValueError as error:
         print(f"\tINVALID DATA!{error}, please try again.\n")
@@ -184,9 +183,10 @@ def validate_range(data, min_no, max_no):
         if ((int(data) or data == "0") and
                 int(data) in range(min_no, max_no + 1)):
             return True
-        raise ValueError(f"Please enter {min_no}-{max_no}")
-    except ValueError as error:
-        print(f"\n\tINVALID DATA!\n\t{error}, please try again.")
+        raise ValueError
+    except ValueError:
+        print(f"""\n\tINVALID DATA!
+        Please enter {min_no}-{max_no}, please try again.""")
         return False
 
 
@@ -265,16 +265,15 @@ def request_employee_data(batch_parameters):
     employee_list = get_employee_list()
     print("\n\n\tEMPLOYEE DATA")
     while True:
-        print("\tComplete data with the employee's initials listed below:")
-        print(f"\t{', '.join(employee_list)}")
+        print("\tComplete data with the employee's initials listed")
+        print(f"\n\tAvailable Employees: {', '.join(employee_list)}")
         scribe = input("\tEnter Scribe initials: \n\t")
         if validate_data(scribe, "availble employee initials", employee_list):
             employee_list.remove(scribe)
             batch_parameters.append(scribe)
             break
     while True:
-        print("\tComplete data with the employee's initials listed below:")
-        print(f"\t{', '.join(employee_list)}")
+        print(f"\n\tAvailable Employees: {', '.join(employee_list)}")
         operator = input("\tEnter Operator initials: \n\t")
         if validate_data(
                 operator, "available employee initials", employee_list):
@@ -286,13 +285,22 @@ def request_employee_data(batch_parameters):
     return batch_parameters
 
 
-def list_ingredients(recipe_no, ingredient_list):
+def list_ingredients(batch_info, ingredient_list, add_weight):
     """
     List ingredients from start to finish
     """
-    recipe = COOKIE_PROTOCOL[recipe_no]
-    for ingredient in recipe[ingredient_list].keys():
-        print(f"\n\t {ingredient}")
+
+    recipe = COOKIE_PROTOCOL[batch_info[1]]
+    total_weight = 90 * int(batch_info[0])
+    list_items = recipe[ingredient_list]
+
+    for ingredient in list_items.keys():
+        ingredient_weight = total_weight * list_items[ingredient]
+        ingredient_formatted = ingredient.ljust(20)
+        if add_weight == "yes":
+            print(f"\n\t {ingredient_formatted}{ingredient_weight}g")
+        else:
+            print(f"\n\t {ingredient}")
 
 
 def valid_made(batch_info):
@@ -360,18 +368,19 @@ def run_instructions(recipe_input, batch_info):
     recipe_details = COOKIE_PROTOCOL[recipe_no]
     title = (recipe_details["name"]).upper()
 
-    title_gap = ''.join(title[i:i+1] for i in range(0, len(title), 1))
+    print(f"\n\tR U N N I N G   R E C I P E:\n\t{title}")
 
-    print(f"\n\tR U N N I N G   R E C I P E:\n\t\t{title}")
-
-    for i in PROCEDURE_STEPS:
-        instructions = PROCEDURE_STEPS[i]
-        print(f"\n(Step {i})")
+    for no in PROCEDURE_STEPS:
+        instructions = PROCEDURE_STEPS[no]
+        print(f"\n(Step {no})")
         for i in instructions:
-            if i == "list_w_i":
-                list_ingredients(recipe_no, "wet ingredients")
+            if i == "list_all":
+                list_ingredients(recipe_input, "wet ingredients", "no")
+                list_ingredients(recipe_input, "dry ingredients", "no")
+            elif i == "list_w_i":
+                list_ingredients(recipe_input, "wet ingredients", "yes")
             elif i == "list_d_i":
-                list_ingredients(recipe_no, "dry ingredients")
+                list_ingredients(recipe_input, "dry ingredients", "yes")
             elif i == "tray no":
                 tray_no = math.ceil(weight/90/10)
                 print(f"\tPlace {tray_no} tray on the work surface.")
@@ -394,7 +403,7 @@ def save_batch_data(data_list):
     Saves batch data to the batches worksheet
     by adding the list data on a new row.
     """
-    print("\n\tUpdating batch sheet")
+    print("\n\tU P D A T I N G   B A T C H   S H E E T")
     selected_worksheet = SHEET.worksheet("batches")
     selected_worksheet.append_row(data_list)
     print("\n\tBatch Data saved on the worksheet successfully.\n")
@@ -421,3 +430,5 @@ def main():
 
 
 main()
+
+# list_ingredients(["1", "55"], "dry ingredients", "yes")
