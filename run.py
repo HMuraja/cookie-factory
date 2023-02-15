@@ -84,23 +84,27 @@ def select_recipe():
     Displays all available recipes and expect user input.
     User input is validated by running user input trhough validate_data
     function.
-    """
-    print("P R O T O C O L S   A V A I L A B L E")
-    print("\nAvailable recipes:")
-    print("\t1.	Classic Cookies")
-    print("\t2.	Raspberry and White Chocolate Cookies")
-    print("\t3.	Peanut Butter Cookies")
+    """  
+    print("R E C I P E S    A V A I L A B L E\n")
+    print("\t Classic Cookies - rw")
+    print("\t Raspberry and White Chocolate Cookies - rw")
+    print("\t Peanut Butter Cookies - pb")
     while True:
-        print("\nPlease select a recipe.")
-        recipe_choice = input("Enter the corresponding number: \n\t")
-        if validate_data(recipe_choice, "1, 2 or 3", ['1', '2', '3']):
+        recipe_choice = input("\n Select recipe by entereing cl, rw or pb:\n\t")
+        if validate_data(recipe_choice, "cl, rw or pb", ['cl', 'rw', 'pb']):
+            if recipe_choice == "cl":
+                name = "Classic Cookies"
+            if recipe_choice == "rw":
+                name = "Raspberry White Chocolate Cookies"
+            if recipe_choice == "pb":
+                name = "Peanut Butter Cookies"
             break
     while True:
         amount = input(
             "\nHow many cookies you plan to prepare min 10 max 100): \n\t")
         if validate_range(amount, 10, 100):
             os.system('clear')
-            return (recipe_choice, amount)
+            return (name, recipe_choice, amount)
 
 
 def generate_date():
@@ -111,7 +115,7 @@ def generate_date():
     return today
 
 
-def generate_batch_number(recipe_no, date_string):
+def generate_batch_number(abbreviation, date_string):
     """
     Function generates a batch number based on the recipe and date.
     Gathers all the information available to a list
@@ -119,11 +123,8 @@ def generate_batch_number(recipe_no, date_string):
     """
     past_batches = SHEET.worksheet("batches").get_all_values()
     number_for_batch = str(len(past_batches)).rjust(3, '0')
-
-    cookie_data = COOKIE_PROTOCOL[recipe_no]
     batch_number = (
-        cookie_data["abbreviation"]
-        + "-" + date_string[8:] + "-" + (number_for_batch))
+        abbreviation + "-" + date_string[8:] + "-" + (number_for_batch))
     return batch_number
 
 
@@ -298,17 +299,18 @@ def main():
     """
     terminal_action = start_menu()
     if terminal_action == "a":
-        recipe_no, cookie_no = select_recipe()
-        todays_date = generate_date()
-        batch_no = generate_batch_number(cookie_no, date)
+        recipe_name, recipe_id, cookie_no = select_recipe()
+        print(recipe_name, recipe_id, cookie_no)
+        #todays_date = generate_date()
+        #batch_no = generate_batch_number(recipe_id, date)
     # protocol_info = ("55", "1")
     # batch_data_2 = ['12/02/2023', 'Classic Cookies', 'cl-23-002', 'wm', 'es']
-        batch_i_1 = display_batch_data(
-            cookie_recipe[0], cookie_recipe[1], todays_date)
-        batch_i_2 = request_employee_data(batch_i_1)
-        final_data = run_instructions(cookie_recipe, batch_i_2)
-        save_batch_data(final_data)
-        main()
+        #batch_i_1 = display_batch_data(
+            #cookie_recipe[0], cookie_recipe[1], todays_date)
+        #batch_i_2 = request_employee_data(batch_i_1)
+        #final_data = run_instructions(cookie_recipe, batch_i_2)
+        #save_batch_data(final_data)
+       # main()
 
 
 main()
