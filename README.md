@@ -23,6 +23,7 @@ If you wish to see the repository and code behind the application you can view i
 I started the project by drafting a a simple flow chart to help me visualize what i wanted to do. The end product doesn't not identcal, but still resembels very much of the original plan. I also wrote the data, meaning instructions and recipes, for the project before even creating a repository for my project. This made it easier to build the code to use that data, and also allowed me to focus more on the code design.
 
 ![FlowChart](/assets/readme-media/diagram.jpg)
+
 ## Visual Design
 As the projects was menat to be made using python, the terminal has been left to minimum. An effort was made to limit the amount of text diplayed on the terminal at once to avoid information overload. All the effects were made by using capital letters, letter spacing, tabs and empty lines. Even though minmal their use was intended to aid the readibility and help in navigation. The emphasis however was kept on the backend side.
 
@@ -42,22 +43,12 @@ As the projects was menat to be made using python, the terminal has been left to
     - Cookie Batch Instance is created as soon as all the information preceeding the process have been performed. This instance is needed to run the instruction function. 
 
 -__Run Instructions__ is a function that will coordinate the display of instruction and inputs. This function will run as soon as the CookieBatch Instance has been created.
-    - Generate List of Instructions
-    - Refer to Recipe
-    - If and else for tags
-    - Text wrap at 72 characters
-    - USer Input
-    - Exit Early
-    - Save Batch
-- __Googl Sheet__
-    - recipes
-    - batch data
-    - instruction steps
-    - employees
 
-Cookie Factory was designed to display an exmaple of an batch control for manufacturing, this application could be used in other manufacturing settings that consisst of a procedure with clear steps and some type of ingredient list. Application is easy to understeand and navigate through requireing minmal input from user and providing input validation, limiting any user errors from occurring. Application was designed to be an easy to follow alternative automated replacement for physical batchrecords or instruction manuals. This project and application is may be extended and modified for various uses, depending from the need.
-
-Thsi application has two main actions: bake cookies and view batches. Baking cookies will ultimately lead to creating a new batch that is saved to the batches worksheet. Viewing batches allows users to view previous batches.
+- __Google Sheet__
+    - Each recipe was added as a work sheet
+    - Batch data was sawed on each row on the batch worksheet
+    - Instructions steps were defined and saved on the google_sheet
+    - Employees list was saved on google sheet
 
 # Testing
 ## Manual
@@ -70,29 +61,21 @@ I used [this](https://pep8ci.herokuapp.com/) PEP8 online linter provided by Codi
 ## Bugs
 Bugs were fixed in several occasion suring the process. Gitpods error messages and print statements were used as tool to troubleshoot and fix the issues.
 
-# Deployement History
+# Deployement in Heroku
 
-## Gitpod
-The project can be deployed in Gitpod.
-
-Following steps were taken to deploy to GitHub page:
-
- - Find the repository you wish to deploy with Gitpod.
- - Click open the repository and find orange button stating gitpod, clikc on it.
- - A new workspace is uploaded on Gitpod for this project.
- - On the Terminal on Gitpod, type "python3 -m http.server".
- - A pop up request permission to open a port 8000, click open in preview or the browser.
-
-## Github Pages
-Live page was deployed in GitHub, as per follows:
- - Find the repository you wish to deploy with Gitpod.
- - Click open the repository and find a "Settings" button on the op ribbon, click on it.
- - Open from the side panel "GitHub Pages" Section.
- - Under "Source", click the "Branch" dropdown and then choose "Master" instead of "None" and press ok.
- - The page will take a while to upload, but once ready a link to the live page will appear on top of the page.
+ - Log in to Heroku with your Credentials
+ - Click Create a New App
+ - Enter unque project/aplication name
+ - Then  got to "Settings" tab and find"Config Vars.
+ - Add "PORT" in the KEY input and "8000" in the VALUE.
+ - Click the "Add" button.
+ - Then click "Add Buildpack."
+ - Add node.js buildpacks.
+ - Sselect the "Deploy" tab from the top.
+ - Select the Github deploy and find repository name, then click the "Connect"..
+ - Then select deployment type: Automatic Deployment or Manual Deployment. I chose Manual
 
 # Credits
-
 ## Code
 All code has been written by me, unless stated otherwise. If code has been taken elsewhere, it has been clearly stated in this section.
 
