@@ -27,21 +27,17 @@ def start_menu():
     Function prints out the main menu presenting the user the
     available activities
     """
-    print("C O O K I E   F A C T O R Y   H O M E  M E N U")
-    print("\nWelcome to the Cookie Factory's procedure terminal!")
-    print("Available actions:")
-    print("\t a.	Bake Cookies")
-    print("\t b.	View Batches")
+    print("\tC O O K I E   F A C T O R Y   H O M E  M E N U")
+    print("\n\tWelcome to the Cookie Factory's procedure terminal!")
+    print("\tAvailable actions:")
+    print("\t\t a.	Bake Cookies")
+    print("\t\t b.	View Batches")
 
     while True:
-        choice = input("\nSelect an action by entering a or b:\n\t")
+        choice = input("\n\tSelect an action by entering a or b:\n\t")
         if validate_data(choice, "a or b", ["a", "b"]):
-            if choice == "a":
-                os.system('clear')
-            else:
-                print("Uploading batch data...(Batches Code not buld yet)\n")
-            break
-    return choice
+            os.system('clear')
+            return choice
 
 
 def validate_data(data, answer_string, *expected_input):
@@ -69,8 +65,102 @@ def validate_range(data, min_no, max_no):
             return True
         raise ValueError
     except ValueError:
-        print(f"""\n\tINVALID DATA! Please enter {min_no}-{max_no}.""")
+        print(f"\n\tINVALID DATA! Please enter value from {min_no}-{max_no}.")
         return False
+
+
+def view_batches():
+    """
+    Displays a menu for vieweing batches.
+    presents two options: view by month or view last 5.
+    User input is validated
+    """
+    print("\n\tV I E W   B A T C H E S")
+    print("\n\tBatches from follwing timelines can be viewed:")
+    print("\t\t a.	Spesific Month")
+    print("\t\t b.	Last Five")
+
+    while True:
+        choice = input("\n\tPlease enter the choice by typing a or b: \n")
+        if validate_data(choice, "a or c", ["a", "b"]):
+            return choice
+
+
+def request_month():
+    """
+    Requestss user input for year and month that user wishes to view.
+    Validates input and formats year for get_months_batches
+    """
+    print("\n\tV I E W   B Y   M O N T H\n")
+    this_year = date.today().year
+    while True:
+        year_choice = input("\tEnter the year(4 digits): \n")
+        if validate_range(year_choice, 2022, this_year):
+            break
+    while True:
+        month_choice = input("\tEnter the month number: \n")
+        if validate_range(month_choice, 1, 12):
+            month_int = int(month_choice)
+            month_string = "0" + str(month_int) + "/" + year_choice
+            print(f"Looking for: {month_string}")
+            return month_string
+
+
+def get_months_batches(time_frame):
+    """
+    Checks if any of the batches fit the given time_frame.
+    Time-frame is month and year like 02/2023.
+    All batches that fit the timeframe are printed.
+    """
+    header = SHEET.worksheet("batches").row_values(1)
+    batches_data = SHEET.worksheet("batches").get_all_values()[1:]
+    target_batches = []
+
+    for batch in batches_data:
+        if batch[0][3:] == time_frame:
+            target_batches.append(batch)
+
+    if not target_batches:
+        print("\n\tNo batches were prepared on the selected month")
+    else:
+        for batch in target_batches:
+            for i in range(9):
+                print(f"\t{header[i].ljust(20)}-\t{batch[i]}")
+            print("\n")
+    while True:
+        print("\n\tType 'view' to retunrn View Batches menu")
+        choice = input("\tand 'main' to return to the Main Menu: \n")
+        if validate_data(choice, 'view or main', ['view', 'main']):
+            if choice == 'view':
+                os.system('clear')
+                view_batches()
+            if choice == 'main':
+                os.system('clear')
+                main()
+
+
+def last_five():
+    """
+    Prints out the last five batches.
+    """
+    header = SHEET.worksheet("batches").row_values(1)
+    batches_data = SHEET.worksheet("batches").get_all_values()[-5:]
+    print("\n\tV I E W   L A S T   5   B A T C H E S\n")
+
+    for batch in batches_data:
+        for i in range(9):
+            print(f"\t{header[i].ljust(20)}-\t{batch[i]}")
+        print("\n")
+    while True:
+        print("Type 'view' to retunrn View Batches menu")
+        choice = input("and 'main' to return to the Main Menu: \n")
+        if validate_data(choice, 'view or main', ['view', 'main']):
+            if choice == 'view':
+                os.system('clear')
+                view_batches()
+            if choice == 'main':
+                os.system('clear')
+                main()
 
 
 def select_recipe():
@@ -301,8 +391,17 @@ def main():
     """
     Runs the terminal functions
     """
-    terminal_action = start_menu()
-    if terminal_action == "a":
+    main_menu_choice = start_menu()
+
+    if main_menu_choice == 'a':
+        view_choice = view_batches()
+        if view_choice == "a":
+            time_frame = request_month()
+            get_months_batches(time_frame)
+        if view_choice == "b":
+            last_five()
+
+    if main_menu_choice == "b":
         recipe_name, recipe_id, cookie_no = select_recipe()
         scribe, operator = input_employees()
         batch_date = generate_date()
