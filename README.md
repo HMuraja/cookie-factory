@@ -4,7 +4,7 @@ Cookie Factory is a terminal based application tool used for reading instruction
 
 App was deployed in Heroku, please find the link to the project [here.](https://cookie-factory.herokuapp.com/)
 
-If you wish to see the repository and code behind the application you can view it in GitHub [here.](https://github.com/HMuraja/cookie-factory
+If you wish to see the repository and code behind the application you can view it in GitHub [here.](https://github.com/HMuraja/cookie-factory)
 
 ## User Goals
 - Simple tool for simple manufacturing activity/procedure.
