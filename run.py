@@ -30,8 +30,8 @@ def start_menu():
     print("\tC O O K I E   F A C T O R Y   H O M E  M E N U")
     print("\n\tWelcome to the Cookie Factory's procedure terminal!")
     print("\tAvailable actions:")
-    print("\t\t a.	Bake Cookies")
-    print("\t\t b.	View Batches")
+    print("\t\t a.	View Batches")
+    print("\t\t b.	Bake Cookies")
 
     while True:
         choice = input("\n\tSelect an action by entering a or b:\n\t")
@@ -81,7 +81,7 @@ def view_batches():
     print("\t\t b.	Last Five")
 
     while True:
-        choice = input("\n\tPlease enter the choice by typing a or b: \n")
+        choice = input("\n\tPlease enter the choice by typing a or b: \n\t")
         if validate_data(choice, "a or c", ["a", "b"]):
             return choice
 
@@ -94,15 +94,18 @@ def request_month():
     print("\n\tV I E W   B Y   M O N T H\n")
     this_year = date.today().year
     while True:
-        year_choice = input("\tEnter the year(4 digits): \n")
+        year_choice = input("\tEnter the year(4 digits): \n\t")
         if validate_range(year_choice, 2022, this_year):
             break
     while True:
-        month_choice = input("\tEnter the month number: \n")
+        month_choice = input("\tEnter the month number: \n\t")
         if validate_range(month_choice, 1, 12):
             month_int = int(month_choice)
-            month_string = "0" + str(month_int) + "/" + year_choice
-            print(f"Looking for: {month_string}")
+            if len(str(month_int)) == 2:
+                month_string = str(month_int) + "/" + year_choice
+            else:
+                month_string = "0" + str(month_int) + "/" + year_choice
+            print(f"\tLooking for: {month_string}")
             return month_string
 
 
@@ -127,16 +130,9 @@ def get_months_batches(time_frame):
             for i in range(9):
                 print(f"\t{header[i].ljust(20)}-\t{batch[i]}")
             print("\n")
-    while True:
-        print("\n\tType 'view' to retunrn View Batches menu")
-        choice = input("\tand 'main' to return to the Main Menu: \n")
-        if validate_data(choice, 'view or main', ['view', 'main']):
-            if choice == 'view':
-                os.system('clear')
-                view_batches()
-            if choice == 'main':
-                os.system('clear')
-                main()
+    input("\tPress Enter to main menu \n\t")
+    os.system('clear')
+    main()
 
 
 def last_five():
@@ -151,16 +147,9 @@ def last_five():
         for i in range(9):
             print(f"\t{header[i].ljust(20)}-\t{batch[i]}")
         print("\n")
-    while True:
-        print("Type 'view' to retunrn View Batches menu")
-        choice = input("and 'main' to return to the Main Menu: \n")
-        if validate_data(choice, 'view or main', ['view', 'main']):
-            if choice == 'view':
-                os.system('clear')
-                view_batches()
-            if choice == 'main':
-                os.system('clear')
-                main()
+    input("\tPress Enter to main menu \n\t")
+    os.system('clear')
+    main()
 
 
 def select_recipe():
@@ -169,13 +158,13 @@ def select_recipe():
     User input is validated by running user input trhough validate_data
     function.
     """
-    print("R E C I P E S    A V A I L A B L E\n")
-    print("\tcl - Classic Cookies")
-    print("\trw - Raspberry and White Chocolate Cookies")
-    print("\tpb -  Peanut Butter Cookies")
+    print("\tR E C I P E S    A V A I L A B L E\n")
+    print("\t\tcl - Classic Cookies")
+    print("\t\trw - Raspberry and White Chocolate Cookies")
+    print("\t\tpb -  Peanut Butter Cookies")
     while True:
         recipe_choice = input(
-            "\n Select recipe by entereing cl, rw or pb:\n\t")
+            "\n\t Select recipe by entereing cl, rw or pb:\n\t")
         if validate_data(recipe_choice, "cl, rw or pb", ['cl', 'rw', 'pb']):
             if recipe_choice == "cl":
                 name = "Classic Cookie"
@@ -186,7 +175,7 @@ def select_recipe():
             break
     while True:
         amount = input(
-            "\nHow many cookies you plan to prepare min 10 max 100: \n\t")
+            "\n\tHow many cookies you plan to prepare min 10 max 100: \n\t")
         if validate_range(amount, 10, 100):
             os.system('clear')
             return (name, recipe_choice, amount)
