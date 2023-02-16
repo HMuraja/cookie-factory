@@ -1,4 +1,3 @@
-# 79 79 79 79 79 79 79 -- MAX width of your terminal-- 79 79 79 79 79 79 79 79
 # External libraries to access google sheets
 import math
 from datetime import date
@@ -19,10 +18,6 @@ CREDS = Credentials.from_service_account_file('creds.json')
 SCOPED_CREDS = CREDS.with_scopes(SCOPE)
 GSPREAD_CLIENT = gspread.authorize(SCOPED_CREDS)
 SHEET = GSPREAD_CLIENT.open('cookie_batches')
-
-# Set up APIs
-batches = SHEET.worksheet('batches')
-batch_data = batches.get_all_values()
 
 # Script for the Cookie Factory Terminal starts from here
 
@@ -60,11 +55,9 @@ def validate_data(data, answer_string, *expected_input):
         for expectation in expected_list:
             if data == expectation:
                 return True
-        raise ValueError(
-            f"\n\tPlease enter {answer_string}"
-            )
-    except ValueError as error:
-        print(f"\tINVALID DATA!{error}, please try again.\n")
+        raise ValueError
+    except ValueError:
+        print(f"\tINVALID DATA! Please enter {answer_string}.\n")
         return False
 
 
@@ -76,8 +69,7 @@ def validate_range(data, min_no, max_no):
             return True
         raise ValueError
     except ValueError:
-        print(f"""\n\tINVALID DATA!
-        Please enter {min_no}-{max_no}, please try again.""")
+        print(f"""\n\tINVALID DATA! Please enter {min_no}-{max_no}.""")
         return False
 
 
@@ -88,9 +80,9 @@ def select_recipe():
     function.
     """
     print("R E C I P E S    A V A I L A B L E\n")
-    print("\t Classic Cookies - rw")
-    print("\t Raspberry and White Chocolate Cookies - rw")
-    print("\t Peanut Butter Cookies - pb")
+    print("\tcl - Classic Cookies")
+    print("\trw - Raspberry and White Chocolate Cookies")
+    print("\tpb -  Peanut Butter Cookies")
     while True:
         recipe_choice = input(
             "\n Select recipe by entereing cl, rw or pb:\n\t")
@@ -104,7 +96,7 @@ def select_recipe():
             break
     while True:
         amount = input(
-            "\nHow many cookies you plan to prepare min 10 max 100): \n\t")
+            "\nHow many cookies you plan to prepare min 10 max 100: \n\t")
         if validate_range(amount, 10, 100):
             os.system('clear')
             return (name, recipe_choice, amount)
@@ -142,19 +134,6 @@ def generate_date():
     return today
 
 
-def generate_batch_no(abbreviation, date_string):
-    """
-    Function generates a batch number based on the recipe and date.
-    Gathers all the information available to a list
-    all data genrated is displayed via print statements
-    """
-    past_batches = SHEET.worksheet("batches").get_all_values()
-    number_for_batch = str(len(past_batches)).rjust(3, '0')
-    batch_number = (
-        abbreviation + "-" + date_string[8:] + "-" + (number_for_batch))
-    return batch_number
-
-
 def list_ingredients(batch_object, ingredient_type, add_weight):
     """
     List ingredients from start to finish
@@ -165,14 +144,16 @@ def list_ingredients(batch_object, ingredient_type, add_weight):
         if ingredient_type in i:
             ingredient_formatted = (i[1]).ljust(20)
             if add_weight == "yes":
-                print(f"\n\t{ingredient_formatted}{total_weight * float(i[2])}g")
+                print(
+                    f"\n\t{ingredient_formatted}{total_weight * float(i[2])}g")
             else:
                 print(f"\n\t {i[1]}")
 
 
 def valid_made(max_value):
     """
-    Validates the made cookies amount.
+    Validates the made cookies amount. Can'texceed the planned amount.
+    Returns the user input after succesful validation.
     """
     while True:
         c_made = input("\n\tEnter the amount of cookies prepared:\n\t")
@@ -184,7 +165,8 @@ def valid_made(max_value):
 def valid_dis(c_made, batch_object):
     """
     Validates the discarded cookies amount entered.
-    If cookies made and discarded is the same run the program ends.
+    If cookies made and discarded is the same run
+    exit_early function is ran.
     """
 
     while True:
@@ -199,7 +181,8 @@ def valid_dis(c_made, batch_object):
 def exit_early(batch_object, made, discarded):
     """
     Confirm if entered cookie number was 0.
-    If yes exit program early.
+    If yes exit program early and runs the method save_batch from class
+    Cookie_Batch
     """
     while True:
         choice = input("\n\tAll cookies dicarded? Type yes or no: \n\t")
@@ -214,8 +197,8 @@ def exit_early(batch_object, made, discarded):
 
 def label_info(batch_object):
     """
-    Lists the label infor for the process
-    Requires batch info for displaying the correct info
+    Lists the label info for the process
+    Requires instance created to displaying the correct info.
     """
     print(f"\n\tBatch Number:\t\t{batch_object.batch_no()}")
     print(f"\tType: \t\t\t{batch_object.name}")
@@ -224,7 +207,9 @@ def label_info(batch_object):
 
 class CookieBatch:
     """
-    Creates an instace of a batch
+    Creates an instace of a batch.
+    Includes methods for creating a batch number and
+    saving batch data to the spreadsheet.
     """
     def __init__(
             self, batch_date, name, recipe_abbreviation, amount, scribe,
@@ -249,7 +234,7 @@ class CookieBatch:
         batch_number = (
             self.recipe_abbreavion + "-" + date_abr + "-" + (batch_count))
         return batch_number
-    
+
     def save_batch(self, batch_no, post_data):
         """
         Saves batch data to the batches worksheet
@@ -271,7 +256,11 @@ class CookieBatch:
 
 def run_instructions(batch_object):
     """
-    Prints out instructions from procedure dictionary
+    Retrieves instruction data from worksheet "Instructions".
+    Prints out intruction data unless key_word is encountered.
+    A function or special statement is run. Returns a list of batch
+    information: cookies_made, cookies_discarded, boolean that states
+    if labelling took place.
     """
     instruction_data = (SHEET.worksheet("Instructions").get_all_values())[1:]
     title = (batch_object.name).upper()
@@ -308,31 +297,21 @@ def run_instructions(batch_object):
     return [cookies_made, cookies_discarded, "yes"]
 
 
-# https://stackoverflow.com/questions/32122022/split-a-string-into-pieces-of-max-length-x-split-only-at-spaces 
-# Code for splitting strings when over desired number but avoiding from splitting words
-
-
 def main():
     """
     Runs the terminal functions
     """
-    #terminal_action = start_menu()
-    #if terminal_action == "a":
-    recipe_name, recipe_id, cookie_no = ['Classic Cookie', 'cl', '20'] # select_recipe()
-    scribe, operator = ['es', 'wb'] # input_employees()
-    batch_date = generate_date()
+    terminal_action = start_menu()
+    if terminal_action == "a":
+        recipe_name, recipe_id, cookie_no = select_recipe()
+        scribe, operator = input_employees()
+        batch_date = generate_date()
 
-    created_batch = CookieBatch(
-        batch_date, recipe_name, recipe_id, cookie_no, scribe, operator)
-    run_instructions(created_batch)
-        #batch_i_1 = display_batch_data(
-            #cookie_recipe[0], cookie_recipe[1], todays_date)
-        #batch_i_2 = request_employee_data(batch_i_1)
-        #final_data = run_instructions(cookie_recipe, batch_i_2)
-        #save_batch_data(final_data)
-       # main()
+        created_batch = CookieBatch(
+            batch_date, recipe_name, recipe_id, cookie_no, scribe, operator)
+        post_data = run_instructions(created_batch)
+        created_batch.save_batch(created_batch.batch_no(), post_data)
+        main()
 
 
 main()
-
-# list_ingredients(["1", "55"], "dry ingredients", "yes")
