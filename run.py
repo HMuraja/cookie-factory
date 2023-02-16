@@ -3,6 +3,7 @@
 import math
 from datetime import date
 import os
+import textwrap
 import gspread
 from google.oauth2.service_account import Credentials
 
@@ -95,11 +96,11 @@ def select_recipe():
             "\n Select recipe by entereing cl, rw or pb:\n\t")
         if validate_data(recipe_choice, "cl, rw or pb", ['cl', 'rw', 'pb']):
             if recipe_choice == "cl":
-                name = "Classic Cookies"
+                name = "Classic Cookie"
             if recipe_choice == "rw":
-                name = "Raspberry White Chocolate Cookies"
+                name = "Raspberry White Chocolate Cookie"
             if recipe_choice == "pb":
-                name = "Peanut Butter Cookies"
+                name = "Peanut Butter Cookie"
             break
     while True:
         amount = input(
@@ -154,56 +155,48 @@ def generate_batch_no(abbreviation, date_string):
     return batch_number
 
 
-def list_ingredients(batch_info, ingredient_list, add_weight):
+def list_ingredients(batch_object, ingredient_type, add_weight):
     """
     List ingredients from start to finish
     """
-
-    recipe = COOKIE_PROTOCOL[batch_info[1]]
-    total_weight = 90 * int(batch_info[0])
-    list_items = recipe[ingredient_list]
-
-    for ingredient in list_items.keys():
-        ingredient_weight = total_weight * list_items[ingredient]
-        ingredient_formatted = ingredient.ljust(20)
-        if add_weight == "yes":
-            print(f"\n\t {ingredient_formatted}{ingredient_weight}g")
-        else:
-            print(f"\n\t {ingredient}")
+    ingredient_data = (SHEET.worksheet(batch_object.name).get_all_values())[1:]
+    total_weight = int(batch_object.amount) * 90
+    for i in ingredient_data:
+        if ingredient_type in i:
+            ingredient_formatted = (i[1]).ljust(20)
+            if add_weight == "yes":
+                print(f"\n\t{ingredient_formatted}{total_weight * float(i[2])}g")
+            else:
+                print(f"\n\t {i[1]}")
 
 
-def valid_made(batch_info):
+def valid_made(max_value):
     """
     Validates the made cookies amount.
     """
-    recipe_amount = batch_info[3]
     while True:
         c_made = input("\n\tEnter the amount of cookies prepared:\n\t")
-        if validate_range(c_made, 0, int(recipe_amount)):
+        if validate_range(c_made, 0, int(max_value)):
             print("\tData valid! Please proceed!")
-            batch_info.extend([c_made])
-            break
+            return c_made
 
 
-def valid_dis(batch_info):
+def valid_dis(c_made, batch_object):
     """
     Validates the discarded cookies amount entered.
     If cookies made and discarded is the same run the program ends.
     """
-    c_made = batch_info[6]
 
     while True:
         c_disc = input("\n\tEnter the amount of cookies discarded:\n\t")
         if validate_range(c_disc, 0, int(c_made)):
             if c_disc == c_made:
-                exit_early(batch_info)
+                exit_early(batch_object, c_disc, c_made)
             else:
-                batch_info.extend([c_disc])
-                print("\n\tData valid! Please proceed!")
-                break
+                return c_disc
 
 
-def exit_early(batch_info):
+def exit_early(batch_object, made, discarded):
     """
     Confirm if entered cookie number was 0.
     If yes exit program early.
@@ -212,73 +205,21 @@ def exit_early(batch_info):
         choice = input("\n\tAll cookies dicarded? Type yes or no: \n\t")
         if validate_data(choice, "yes or no", ["yes", "no"]):
             if choice == "yes":
-                batch_info.extend([batch_info[6], "no"])
-                save_batch_data(batch_info)
+                batch_no = batch_object.batch_no()
+                post_data = [made, discarded, "no"]
+                batch_object.save_batch(batch_no, post_data)
                 main()
             break
 
 
-def label_info(batch_info):
+def label_info(batch_object):
     """
     Lists the label infor for the process
     Requires batch info for displaying the correct info
     """
-    print(f"\n\tBatch Number:\t\t{batch_info[2]}")
-    print(f"\tType: \t\t\t{batch_info[1]}")
-    print(f"\tManufacturing date: \t{batch_info[0]}")
-
-
-def run_instructions(recipe_input, batch_info):
-    """
-    Prints out instructions from procedure dictionary
-    """
-    weight = int(recipe_input[1]) * 90
-    recipe_no = recipe_input[1]
-    recipe_details = COOKIE_PROTOCOL[recipe_no]
-    title = (recipe_details["name"]).upper()
-
-    print(f"\n\tR U N N I N G   R E C I P E:\n\t{title}")
-
-    for no in PROCEDURE_STEPS:
-        instructions = PROCEDURE_STEPS[no]
-        print(f"\n(Step {no})")
-        for i in instructions:
-            if i == "list_all":
-                list_ingredients(recipe_input, "wet ingredients", "no")
-                list_ingredients(recipe_input, "dry ingredients", "no")
-            elif i == "list_w_i":
-                list_ingredients(recipe_input, "wet ingredients", "yes")
-            elif i == "list_d_i":
-                list_ingredients(recipe_input, "dry ingredients", "yes")
-            elif i == "tray no":
-                tray_no = math.ceil(weight/90/10)
-                print(f"\tPlace {tray_no} tray on the work surface.")
-            elif i == "made input":
-                valid_made(batch_info)
-            elif i == "discarded input":
-                valid_dis(batch_info)
-            elif i == "label info":
-                label_info(batch_info)
-            else:
-                print(f"\n\t{i}")
-        input("\n\tPress ENTER to move onto next step \n\t")
-        os.system('clear')
-    batch_info.append("yes")
-    return batch_info
-
-
-def save_batch_data(data_list):
-    """
-    Saves batch data to the batches worksheet
-    by adding the list data on a new row.
-    """
-    print("\n\tU P D A T I N G   B A T C H   S H E E T")
-    selected_worksheet = SHEET.worksheet("batches")
-    selected_worksheet.append_row(data_list)
-    print("\n\tBatch Data saved on the worksheet successfully.\n")
-    print("\n\tP R O C E S S   F I N I S H E D")
-    input("\tPress enter to return to main menu.\n\n")
-    os.system('clear')
+    print(f"\n\tBatch Number:\t\t{batch_object.batch_no()}")
+    print(f"\tType: \t\t\t{batch_object.name}")
+    print(f"\tManufacturing date: \t{batch_object.batch_date}")
 
 
 class CookieBatch:
@@ -286,11 +227,11 @@ class CookieBatch:
     Creates an instace of a batch
     """
     def __init__(
-            self, batch_date, recipe, recipe_abbreavion, amount, scribe,
+            self, batch_date, name, recipe_abbreviation, amount, scribe,
             operator):
         self.batch_date = batch_date
-        self.recipe = recipe
-        self.recipe_abbreavion = recipe_abbreavion
+        self.name = name
+        self.recipe_abbreavion = recipe_abbreviation
         self.amount = amount
         self.scribe = scribe
         self.operator = operator
@@ -308,22 +249,82 @@ class CookieBatch:
         batch_number = (
             self.recipe_abbreavion + "-" + date_abr + "-" + (batch_count))
         return batch_number
+    
+    def save_batch(self, batch_no, post_data):
+        """
+        Saves batch data to the batches worksheet
+        by adding the final_list on a new row.
+        """
+        final_list = [
+            self.batch_date, self.name, batch_no,
+            self.amount, self.scribe, self.operator]
+        for data in post_data:
+            final_list.append(data)
+        print("\n\tU P D A T I N G   B A T C H   S H E E T")
+        selected_worksheet = SHEET.worksheet("batches")
+        selected_worksheet.append_row(final_list)
+        print("\n\tBatch Data saved on the worksheet successfully.\n")
+        print("\n\tP R O C E S S   F I N I S H E D")
+        input("\tPress enter to return to main menu.\n\n")
+        os.system('clear')
+
+
+def run_instructions(batch_object):
+    """
+    Prints out instructions from procedure dictionary
+    """
+    instruction_data = (SHEET.worksheet("Instructions").get_all_values())[1:]
+    title = (batch_object.name).upper()
+
+    for i in range(len(instruction_data)):
+        print(f"\n\tR U N N I N G   R E C I P E:\n\t{title}")
+        print(f"\n\tS T E P  {i + 1}.")
+        for set in instruction_data[i]:
+            if set == '':
+                break
+            elif set == "list_all":
+                list_ingredients(batch_object, "wet", "no")
+                list_ingredients(batch_object, "dry", "no")
+            elif set == "list_w_i":
+                list_ingredients(batch_object, "wet", "yes")
+            elif set == "list_d_i":
+                list_ingredients(batch_object, "dry", "yes")
+            elif set == "tray no":
+                tray_no = math.ceil(int(batch_object.amount)/10)
+                print(f"\tPrepare {tray_no} tray(s)")
+            elif set == "made input":
+                cookies_made = valid_made(batch_object.amount)
+            elif set == "discarded input":
+                cookies_discarded = valid_dis(cookies_made, batch_object)
+            elif set == "label info":
+                label_info(batch_object)
+            else:
+                lines = textwrap.wrap(
+                    set, 72, break_long_words=False)
+                for line in lines:
+                    print(f"\t{line}")
+        input("\n\tPress ENTER to move onto next step \n\t")
+        os.system('clear')
+    return [cookies_made, cookies_discarded, "yes"]
+
+
+# https://stackoverflow.com/questions/32122022/split-a-string-into-pieces-of-max-length-x-split-only-at-spaces 
+# Code for splitting strings when over desired number but avoiding from splitting words
 
 
 def main():
     """
     Runs the terminal functions
     """
-    terminal_action = start_menu()
-    if terminal_action == "a":
-        recipe_name, recipe_id, cookie_no = select_recipe()
-        scribe, operator = input_employees()
-        batch_date = generate_date()
-        manufactured_batch = CookieBatch(
-            batch_date, recipe_name, recipe_id, cookie_no, scribe, operator)
-        print(manufactured_batch.batch_no())
-    # protocol_info = ("55", "1")
-    # batch_data_2 = ['12/02/2023', 'Classic Cookies', 'cl-23-002', 'wm', 'es']
+    #terminal_action = start_menu()
+    #if terminal_action == "a":
+    recipe_name, recipe_id, cookie_no = ['Classic Cookie', 'cl', '20'] # select_recipe()
+    scribe, operator = ['es', 'wb'] # input_employees()
+    batch_date = generate_date()
+
+    created_batch = CookieBatch(
+        batch_date, recipe_name, recipe_id, cookie_no, scribe, operator)
+    run_instructions(created_batch)
         #batch_i_1 = display_batch_data(
             #cookie_recipe[0], cookie_recipe[1], todays_date)
         #batch_i_2 = request_employee_data(batch_i_1)
