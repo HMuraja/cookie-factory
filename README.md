@@ -1,10 +1,22 @@
-# **Cookie Factory - Project Portfolio 3 - Python**
+
+<div align=center>
+
+<h1><strong>Project 3 - Cookie Factory Protocol Terminal</strong></h1>
+
+
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) 
+![Heroku](https://img.shields.io/badge/heroku-%23430098.svg?style=for-the-badge&logo=heroku&logoColor=white)
+![Gitpod](https://img.shields.io/badge/gitpod-f06611.svg?style=for-the-badge&logo=gitpod&logoColor=white)
+
+
 
 Cookie Factory is a terminal based application tool used for reading instructions, creating new cookie batches and viewing past one. Cookie Factory is used jointly with a google spreadsheet,that contains the data necessary to run the application.
 
 App was deployed in Heroku, please find the link to the project [here.](https://cookie-factory.herokuapp.com/)
 
 If you wish to see the repository and code behind the application you can view it in GitHub [here.](https://github.com/HMuraja/cookie-factory)
+
+</div>
 
 ## User Goals
 - Simple tool for simple manufacturing activity/procedure.
@@ -86,6 +98,7 @@ All code has been written by me, unless stated otherwise. If code has been taken
 Sources for troubleshooting:
  - [W3Schools](https://www.w3schools.com/)
  - [Code Institutes Course Material](https://codeinstitute.net/)
+
 
 ## Content and Media
 - Recipes were based on recipe from [sallys baking addiction blog.](https://sallysbakingaddiction.com/chewy-chocolate-chip-cookies/).
